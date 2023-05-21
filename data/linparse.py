@@ -189,7 +189,13 @@ def get_bids(lin, dealer):
         return None
 
     # extract the bid sequence
-    bids = bids_match.group(1).split('|mb|')
+    bids_match = bids_match.group(1)
+    bidding_end = 'mb|p|mb|p|mb|p'
+    idx_end = bids_match.find(bidding_end)
+    bids_match = bids_match[:idx_end] + bidding_end
+    if idx_end < 0:
+        raise Exception("Bid end not found")
+    bids = bids_match.split('|mb|')
     bids = [re.sub(r'(\|?an\|(.*)?$)|\!', '', x) for x in bids]
     
 
