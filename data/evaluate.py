@@ -18,9 +18,12 @@ def json_to_lin_cards(dct):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='parsing line files')
+    parser.add_argument('start', type=int)
+    parser.add_argument('end', type=int)
     args = parser.parse_args()
     fn = 0
-    for f in os.listdir('expert_data_final'):
+    files = list(os.listdir('expert_data_final'))
+    for f in files[args.start:args.end]:
         fn += 1
         t_s = time.time()
         if f.endswith('.json'):
