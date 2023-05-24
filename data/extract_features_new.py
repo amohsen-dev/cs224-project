@@ -153,7 +153,7 @@ def extract(input_file):
         next_bid = 3 + (tricks-1)*(NUM_SUITS+1) + suit
         bid_index =  3 + ((tricks-1)*(NUM_SUITS+1) + suit)*9
         state = -1
-    data.append((next_hand, next_vul, np.copy(bid_sequence), next_bid, partner_hand))
+    data.append((next_hand, next_vul, np.copy(bid_sequence), np.array([next_bid]), partner_hand))
     player = (player + 1)%NUM_PLAYERS
     next_hand = hands[player,:]
     partner_hand = hands[(player + 2)%NUM_PLAYERS,:]
@@ -175,7 +175,7 @@ def extract(input_file):
             next_bid = 3 + (tricks-1)*(NUM_SUITS+1) + suit
             bid_index =  3 + ((tricks-1)*(NUM_SUITS+1) + suit)*9
             state = -1
-        data.append((next_hand, next_vul, np.copy(bid_sequence), next_bid, partner_hand))
+        data.append((next_hand, next_vul, np.copy(bid_sequence), np.array([next_bid]), partner_hand))
         player = (player + 1)%NUM_PLAYERS
         next_hand = hands[player,:]
         partner_hand = hands[(player + 2)%NUM_PLAYERS,:]
@@ -198,7 +198,7 @@ def extract(input_file):
             next_bid = 3 + (tricks-1)*(NUM_SUITS+1) + suit
             bid_index =  3 + ((tricks-1)*(NUM_SUITS+1) + suit)*9
             state = -1
-        data.append((next_hand, next_vul, np.copy(bid_sequence), next_bid, partner_hand))
+        data.append((next_hand, next_vul, np.copy(bid_sequence), np.array([next_bid]), partner_hand))
         player = (player + 1)%NUM_PLAYERS
         next_hand = hands[player,:]
         partner_hand = hands[(player + 2)%NUM_PLAYERS,:]
@@ -247,7 +247,7 @@ def extract(input_file):
                 next_bid = 3 + (tricks-1)*(NUM_SUITS+1) + suit
                 bid_index =  3 + ((tricks-1)*(NUM_SUITS+1) + suit)*9
                 state = -1
-            data.append((next_hand, next_vul, np.copy(bid_sequence), next_bid, partner_hand))
+            data.append((next_hand, next_vul, np.copy(bid_sequence), np.array([next_bid]), partner_hand))
             player = (player + 1)%NUM_PLAYERS
             next_hand = hands[player,:]
             partner_hand = hands[(player + 2)%NUM_PLAYERS,:]
