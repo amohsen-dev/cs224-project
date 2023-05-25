@@ -1,4 +1,5 @@
 import torch
+from tqdm import tqdm
 import numpy as np
 import pandas as pd
 from torch.utils.tensorboard import SummaryWriter
@@ -47,6 +48,18 @@ def get_dummy_data():
     return x_train, y_train, b_train
 
 
+def get_file_data():
+    ddd = pd.read_pickle('INTDATA.pkl').values
+    x_train = ddd[:, :372]
+    y_train = ddd[:, -52:]
+    b_train = ddd[:, 372]
+
+    x_train = torch.from_numpy(x_train).type(torch.float32)
+    y_train = torch.from_numpy(y_train).type(torch.float32)
+    b_train = torch.nn.functional.one_hot( torch.from_numpy( b_train ).long(), -1 )
+
+    return x_train, y_train, b_train
+
 if __name__=='__main__':
     lr = 1e-3
     n = 10000
@@ -55,12 +68,15 @@ if __name__=='__main__':
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     x_train, y_train, b_train = get_dummy_data()
+    x_train, y_train, b_train = get_file_data()
+    
     dataset_train = torch.utils.data.TensorDataset(x_train, y_train)
     dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size)
     model_enn = ENN().to(device)
     optimizer = torch.optim.Adam(model_enn.parameters(), lr=lr)
     writer = SummaryWriter(log_dir='.')
     for i_epoch in range(num_epochs):
+        print(i_epoch)
         for x_b, y_b in dataloader_train:
             x_b, y_b = x_b.to(device), y_b.to(device)
             logit_b = model_enn(x_b)
@@ -69,14 +85,15 @@ if __name__=='__main__':
             optimizer.step()
             optimizer.zero_grad()
             writer.add_scalar("Loss/train", loss, i_epoch)
+    torch.save(model_enn.state_dict(), ".")
 
-
+    """
     dataset_train = torch.utils.data.TensorDataset(x_train, b_train)
     dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size)
     model_pnn = PNN().to(device)
     optimizer = torch.optim.Adam(model_pnn.parameters(), lr=lr)
     for i_epoch in range(num_epochs):
-        for x_b, b_b in dataloader_train:
+        for x_b, b_b in tqdm(dataloader_train):
             x_b, b_b = x_b.to(device), b_b.to(device)
             enn_b = model_enn(x_b).detach()
             x2_b = torch.concat([x_b, enn_b], dim=1)
@@ -85,3 +102,4 @@ if __name__=='__main__':
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
+    """
