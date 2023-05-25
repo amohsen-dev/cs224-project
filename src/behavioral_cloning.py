@@ -49,7 +49,7 @@ def get_dummy_data():
 
 
 def get_file_data():
-    ddd = pd.read_pickle('INTDATA.pkl').values
+    ddd = pd.read_pickle('INTDATA_0_50000.pkl').values
     x_train = ddd[:, :372]
     y_train = ddd[:, -52:]
     b_train = ddd[:, 372]
@@ -61,13 +61,12 @@ def get_file_data():
     return x_train, y_train, b_train
 
 if __name__=='__main__':
-    lr = 1e-3
-    n = 10000
+    lr = 1e-2
     batch_size = 32
-    num_epochs = 20
+    num_epochs = 4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    x_train, y_train, b_train = get_dummy_data()
+    # x_train, y_train, b_train = get_dummy_data()
     x_train, y_train, b_train = get_file_data()
     
     dataset_train = torch.utils.data.TensorDataset(x_train, y_train)
@@ -77,7 +76,7 @@ if __name__=='__main__':
     writer = SummaryWriter(log_dir='.')
     for i_epoch in range(num_epochs):
         print(i_epoch)
-        for x_b, y_b in dataloader_train:
+        for x_b, y_b in tqdm(dataloader_train):
             x_b, y_b = x_b.to(device), y_b.to(device)
             logit_b = model_enn(x_b)
             loss = torch.nn.functional.cross_entropy(logit_b, y_b.type(torch.float32))
@@ -85,14 +84,16 @@ if __name__=='__main__':
             optimizer.step()
             optimizer.zero_grad()
             writer.add_scalar("Loss/train", loss, i_epoch)
-    torch.save(model_enn.state_dict(), ".")
+        print(loss)
+    # torch.save(model_enn.state_dict(), ".")
 
-    """
+    
     dataset_train = torch.utils.data.TensorDataset(x_train, b_train)
     dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size)
     model_pnn = PNN().to(device)
     optimizer = torch.optim.Adam(model_pnn.parameters(), lr=lr)
     for i_epoch in range(num_epochs):
+        print(i_epoch)
         for x_b, b_b in tqdm(dataloader_train):
             x_b, b_b = x_b.to(device), b_b.to(device)
             enn_b = model_enn(x_b).detach()
@@ -102,4 +103,4 @@ if __name__=='__main__':
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
-    """
+        print(loss)
