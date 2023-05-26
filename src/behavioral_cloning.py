@@ -63,7 +63,7 @@ def get_file_data():
 if __name__=='__main__':
     lr = 1e-3
     batch_size = 32
-    num_epochs = 4
+    num_epochs = 40
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # x_train, y_train, b_train = get_dummy_data()
@@ -80,14 +80,15 @@ if __name__=='__main__':
         for x_b, y_b in tqdm(dataloader_train):
             x_b, y_b = x_b.to(device), y_b.to(device)
             logit_b = model_enn(x_b)
-            loss = -(y_b * logit_b.log() + (1-y_b) * (1-logit_b).log()).mean() 
+            # loss = -(y_b * logit_b.log() + (1-y_b) * (1-logit_b).log()).mean() 
+            loss = torch.nn.functional.binary_cross_entropy(logit_b, y_b)
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
             writer.add_scalar("Loss/train", loss, i_epoch)
             losses.append(loss.detach().numpy())
         print(np.mean(losses))
-    # torch.save(model_enn.state_dict(), ".")
+        torch.save(model_enn.state_dict(), f"model_enn_{i_epoch}.data")
 
     
     dataset_train = torch.utils.data.TensorDataset(x_train, b_train)
