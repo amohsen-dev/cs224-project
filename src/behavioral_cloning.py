@@ -9,9 +9,9 @@ class ENN(torch.nn.Module):
     def __init__(self):
         super().__init__()
         self.layers = torch.nn.Sequential(
-            torch.nn.Linear(372, 100),
+            torch.nn.Linear(372, 52),
             torch.nn.ReLU(),
-            torch.nn.Linear(100, 52),
+            torch.nn.Linear(52, 52),
             torch.nn.Sigmoid(),
         )
 
@@ -49,7 +49,7 @@ def get_dummy_data():
 
 
 def get_file_data():
-    ddd = pd.read_pickle('INTDATA_0_50000.pkl').values
+    ddd = pd.read_pickle('INTDATA.pkl').values
     x_train = ddd[:, :372]
     y_train = ddd[:, -52:]
     b_train = ddd[:, 372]
@@ -61,7 +61,7 @@ def get_file_data():
     return x_train, y_train, b_train
 
 if __name__=='__main__':
-    lr = 1e-2
+    lr = 1e-3
     batch_size = 32
     num_epochs = 4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -76,15 +76,17 @@ if __name__=='__main__':
     writer = SummaryWriter(log_dir='.')
     for i_epoch in range(num_epochs):
         print(i_epoch)
+        losses = []
         for x_b, y_b in tqdm(dataloader_train):
             x_b, y_b = x_b.to(device), y_b.to(device)
             logit_b = model_enn(x_b)
-            loss = torch.nn.functional.cross_entropy(logit_b, y_b.type(torch.float32))
+            loss = -(y_b * logit_b.log() + (1-y_b) * (1-logit_b).log()).mean() 
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
             writer.add_scalar("Loss/train", loss, i_epoch)
-        print(loss)
+            losses.append(loss.detach().numpy())
+        print(np.mean(losses))
     # torch.save(model_enn.state_dict(), ".")
 
     
