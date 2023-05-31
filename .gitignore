@@ -164,3 +164,4 @@ data/expert_data_final
 data/expert_data_eval
 *.DS_Store
 *.ipynb
+*.pkl
