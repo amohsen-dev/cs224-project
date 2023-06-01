@@ -53,10 +53,14 @@ def vul_encoding(vul_char, player):
             vul = np.array([0,1])          
     return vul
 
-def extract2(input_file):
-    data = []
+def extract_from_file(input_file):
     with open(input_file, 'r') as fp:
         DICT = json.load(fp)
+    return extract_from_dict(DICT)
+
+
+def extract_from_dict(DICT):
+    data = []
     vul_char = DICT['vuln'][0]
     dealer_char = DICT['dealer']
     dealer = PLAYER_INDEX[dealer_char]
@@ -98,7 +102,7 @@ def extract2(input_file):
             return data
         bid_id += 1
         bid = bid_list[bid_id]
-        if bid_char == 'p':
+        if bid == 'p':
             next_bid = 0
         else:
             tricks = int(bid[0])
@@ -182,6 +186,13 @@ def extract2(input_file):
             partner_hand = hands[(player + 2)%NUM_PLAYERS,:]
             next_vul = vul_encoding(vul_char, player)
     
+
+def extract_from_incomplete_game(DICT):
+    DICT_with_termination = DICT.copy()
+    DICT_with_termination['bids'] = DICT_with_termination['bids'] + ['p'] * 4
+    idx = len(DICT['bids'])
+    return extract_from_dict(DICT_with_termination)[idx]
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Extract features')

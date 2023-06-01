@@ -37,9 +37,15 @@ def generate_random_game():
     return game
 
 if __name__ == '__main__':
+    from extract_features import extract_from_incomplete_game
+    game = generate_random_game()
+    game['bids'] += ['p', '1H']
+    test = extract_from_incomplete_game(game)
+
+
     with open('tmp/random_game.json', 'w') as fp:
         json.dump(generate_random_game(), fp, indent=4)
-    from extract_features import extract2
-    data2 = extract2('data/expert_data_final/games1000_0.json')
+    from extract_features import extract_from_file
+    data2 = extract_from_file('tmp/random_game.json')
     data = extract('data/expert_data_final/games1000_0.json')
     print(data)
