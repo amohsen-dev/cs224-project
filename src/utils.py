@@ -1,17 +1,31 @@
 import json
 import numpy as np
 from itertools import product
-from extract_features_new import extract
+
+NUM_PLAYERS = 4
+DECK_SIZE = 52
+NUM_SUITS = 4
+NUM_CARDS = 13
+MAX_BID_LENGTH = 318
+NUM_BIDS = 38
 
 
-deck = [''.join(c) for c in product(['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'], ['H', 'S', 'D', 'C'])]
-dealers = ['S', 'W', 'N', 'E']
+PLAYERS = ['S', 'W', 'N', 'E']
+PLAYER_INDEX = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
+tmp = np.arange(2, 11).astype(np.int32)
+CARDNO_INDEX = dict(zip(map(str, tmp), tmp-2))
+CARDNO_INDEX = {**CARDNO_INDEX, **{'J': 9, 'Q': 10, 'K': 11, 'A': 12}}
+SUIT_INDEX = {'C': 0, 'D': 1, 'H': 2, 'S': 3, 'N': 4}
+SUIT_INDEX_REV = {v: k for k, v in SUIT_INDEX.items()}
+CARD_INDEX = { c + s: CARDNO_INDEX[c] + NUM_CARDS * SUIT_INDEX[s]  for c, s in product(CARDNO_INDEX.keys(), ['C', 'D', 'H', 'S'])}
+DECK = list(CARD_INDEX.keys())
+
 vulns = ['both', 'NE', 'SW', 'none']
 
 def generate_random_hands():
-    deck_tmp = deck.copy()
+    deck_tmp = DECK.copy()
     hands = {}
-    for h in dealers:
+    for h in PLAYERS:
         hands[h] = np.random.choice(deck_tmp, size=13, replace=False).tolist()
         deck_tmp = [c for c in deck_tmp if c not in hands[h]]
     return hands
@@ -21,7 +35,7 @@ def generate_random_game():
     hands = {k: ','.join(v) for k, v in hands.items()}
     game = {
             'players': None,
-            'dealer': np.random.choice(dealers, 1)[0],
+            'dealer': np.random.choice(PLAYERS, 1)[0],
             'hands': hands,
             'bids': [],
             'play': None,
@@ -36,16 +50,33 @@ def generate_random_game():
 
     return game
 
+def bid_to_label(bid):
+    if bid == 'p':
+        next_bid = 0
+    elif bid[0] == 'd':
+        next_bid = 1
+    elif bid[0] == 'r':
+        next_bid = 2
+    else:
+        tricks = int(bid[0])
+        suit = SUIT_INDEX[bid[1]]
+        next_bid = 3 + (tricks-1)*(NUM_SUITS+1) + suit
+    return next_bid
+
+def label_to_bid(label):
+    if label == 0:
+        return 'p'
+    elif label == 1:
+        return 'd'
+    elif label == 2:
+        return 'r'
+    else:
+        tmp = label - 3
+        suit = tmp % (1 + NUM_SUITS)
+        tricks = 1 + tmp // (1 + NUM_SUITS)
+        return str(tricks) + SUIT_INDEX_REV[suit] 
+
 if __name__ == '__main__':
-    from extract_features import extract_from_incomplete_game
-    game = generate_random_game()
-    game['bids'] += ['p', '1H']
-    test = extract_from_incomplete_game(game)
-
-
-    with open('tmp/random_game.json', 'w') as fp:
-        json.dump(generate_random_game(), fp, indent=4)
-    from extract_features import extract_from_file
-    data2 = extract_from_file('tmp/random_game.json')
-    data = extract('data/expert_data_final/games1000_0.json')
-    print(data)
+    l = bid_to_label('3H')
+    lb = label_to_bid(l)
+    print(lb)
