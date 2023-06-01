@@ -76,6 +76,18 @@ def label_to_bid(label):
         tricks = 1 + tmp // (1 + NUM_SUITS)
         return str(tricks) + SUIT_INDEX_REV[suit] 
 
+def json_to_lin_cards(dct):
+    H = []
+    for P in ['S', 'W', 'N', 'E']:
+        hh = {'S': [], 'H': [], 'D': [], 'C': []}
+        for h in dct['hands'][P].split(','):
+            hh[h[-1]].append(h[0] if len(h) == 2 else 'T')
+        hhh = ''
+        for s in ['S', 'H', 'D', 'C']:
+            hhh += s + ''.join(hh[s])
+        H.append(hhh)
+    return ','.join(H)
+
 if __name__ == '__main__':
     l = bid_to_label('3H')
     lb = label_to_bid(l)

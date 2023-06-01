@@ -23,7 +23,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     fn = 0
     files = list(os.listdir('expert_data_final'))
-    for f in files[args.start:args.end]:
+    #for f in files[args.start:args.end]:
+    for f in files[:1]:
         fn += 1
         t_s = time.time()
         if f.endswith('.json'):
