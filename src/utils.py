@@ -17,16 +17,16 @@ CARDNO_INDEX = dict(zip(map(str, tmp), tmp-2))
 CARDNO_INDEX = {**CARDNO_INDEX, **{'J': 9, 'Q': 10, 'K': 11, 'A': 12}}
 SUIT_INDEX = {'C': 0, 'D': 1, 'H': 2, 'S': 3, 'N': 4}
 SUIT_INDEX_REV = {v: k for k, v in SUIT_INDEX.items()}
-CARD_INDEX = { c + s: CARDNO_INDEX[c] + NUM_CARDS * SUIT_INDEX[s]  for c, s in product(CARDNO_INDEX.keys(), ['C', 'D', 'H', 'S'])}
+CARD_INDEX = { c + s: CARDNO_INDEX[c] + NUM_CARDS * SUIT_INDEX[s]  for s, c in product(['C', 'D', 'H', 'S'], CARDNO_INDEX.keys())}
 DECK = list(CARD_INDEX.keys())
 
-vulns = ['both', 'NE', 'SW', 'none']
+vulns = ['both', 'NS', 'EW', 'none']
 
 def generate_random_hands():
     deck_tmp = DECK.copy()
     hands = {}
     for h in PLAYERS:
-        hands[h] = np.random.choice(deck_tmp, size=13, replace=False).tolist()
+        hands[h] = sorted(np.random.choice(deck_tmp, size=13, replace=False).tolist(), key=lambda c: CARD_INDEX[c], reverse=True)
         deck_tmp = [c for c in deck_tmp if c not in hands[h]]
     return hands
 
