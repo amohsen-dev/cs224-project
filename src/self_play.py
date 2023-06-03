@@ -45,11 +45,12 @@ class ConsoleAgent(Agent):
             bid = input(f'{self.__repr__()} - Enter opponent bid: ')
         return None, bid
 
-def play_random_game(agent1: Agent, agent2: Agent):
+def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
     game1 = generate_random_game()
     game2 = copy.deepcopy(game1)
 
-    print(json.dumps(game1, indent=4))
+    if verbose:
+        print(json.dumps(game1, indent=4))
     game_scores = []
     path = []
     for agent1_side, game in zip(['EW', 'NS'], [game1, game2]):
@@ -57,12 +58,14 @@ def play_random_game(agent1: Agent, agent2: Agent):
         bidding_player = []
         current_player = game['dealer']
         current_index = PLAYERS.index(current_player)
-        print(f'PNN as {agent1_side} playing against oppenent')
+        if verbose:
+            print(f'PNN as {agent1_side} playing against oppenent')
         while True:
             if current_player in agent1_side:
                 state, bid = agent1.bid(game)
                 path.append((state, bid_to_label(bid), 0))
-                print(f'{current_player} - agent1 bids: {bid}')
+                if verbose:
+                    print(f'{current_player} - agent1 bids: {bid}')
             else:
                 _, bid = agent2.bid(game)
             if bid == 'p' and (npasses < 2 or len(game['bids']) == 2):
@@ -85,14 +88,16 @@ def play_random_game(agent1: Agent, agent2: Agent):
         game['doubled'] = doubled
         game['declarer'] = declarer
 
-        print(json.dumps(game, indent=4))
+        if verbose:
+            print(json.dumps(game, indent=4))
         trick = eval_trick_from_game(agent1_side, game)
-        game_score = calc_score_adj(agent1_side, game['declarer'], game['contract'], trick, game['vuln'], game['doubled'])
+        game_score = calc_score_adj(agent1_side, game['declarer'], game['contract'], trick, game['vuln'], game['doubled'], verbose)
         game_scores.append(game_score)
 
     IMP = calc_imp(sum(game_scores))
     path[-1] = (path[-1][0], path[-1][1], IMP)
-    print('*' * 60 + f'  IMP = {IMP}  ' + '*' * 60)
+    if verbose:
+        print('*' * 60 + f'  IMP = {IMP}  ' + '*' * 60)
     if contract is None:
         path = None
     return path
@@ -101,5 +106,5 @@ def play_random_game(agent1: Agent, agent2: Agent):
 if __name__ == '__main__':
     agent1 = PNNAgent()
     agent2 = PNNAgent()
-    path = play_random_game(agent1, agent2)
+    path = play_random_game(agent1, agent2, verbose=False)
     print('path generated')

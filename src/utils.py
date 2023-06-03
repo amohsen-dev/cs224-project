@@ -126,7 +126,7 @@ def eval_trick_from_game(players, game):
         trick = 13 - trick
     return trick
 
-def calc_score_adj(pos, declarer, contract, trick, vuln, doubled):
+def calc_score_adj(pos, declarer, contract, trick, vuln, doubled, verbose=False):
     if doubled == 'r':
         doubled, redoubled = 0, 1
     elif doubled == 'd':
@@ -140,14 +140,17 @@ def calc_score_adj(pos, declarer, contract, trick, vuln, doubled):
 
     level, suit = int(contract[:-1]), SUIT_INDEX[contract[-1]]
 
-    print(f'calling calc_score with args ({level, suit, trick, vul, doubled, redoubled})')
+    if verbose:
+        print(f'calling calc_score with args ({level, suit, trick, vul, doubled, redoubled})')
     score = calc_score(level, suit, trick, vul, doubled, redoubled)
-    print(f'received score {score}')
+    if verbose:
+        print(f'received score {score}')
     if declarer in 'EW':
         score = -score
     if ((pos in 'EW') and (declarer in 'NS')) or ((pos in 'NS') or (declarer in 'EW')):
         score = -score
-    print(f'score adjusted to {score}')
+    if verbose:
+        print(f'score adjusted to {score}')
     return score
 
 
