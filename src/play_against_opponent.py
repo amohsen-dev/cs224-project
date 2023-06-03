@@ -9,7 +9,7 @@ from utils import json_to_lin_cards, calc_score_adj, calc_imp, eval_trick_from_g
 from behavioral_cloning_test import ENN, PNN
 from utils import generate_random_game, label_to_bid, bid_to_label
 from extract_features import extract_from_incomplete_game
-from troch.distributions.categorical import Categorical
+from torch.distributions.categorical import Categorical
 
 PLAYERS = ['S', 'W', 'N', 'E']
 
