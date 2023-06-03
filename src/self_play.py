@@ -68,7 +68,7 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
             if current_player in agent1_side:
                 state, bid = agent1.bid(game)
                 path['states'].append(state)
-                path['actions'].append(bid_to_label(bid))
+                path['actions'].append(torch.Tensor(bid_to_label(bid)))
                 path['rewards'].append(0)
                 if verbose:
                     print(f'{current_player} - agent1 bids: {bid}')
@@ -126,6 +126,14 @@ class PolicyGradient:
         return paths
 
     def update_policy(self, paths):
+        for path in paths:
+            loss = torch.Tensor(0)
+            for state, action in zip(path['states'], path['actions']):
+                enn = self.agent_target.model_enn(state)
+                logits = self.agent_target.model_pnn(torch.cat([state, enn]))
+                dist = Categorical(logits=logits)
+                loss += dist.log_prob(action) * path['rewards'][-1]
+            loss = loss.mean()
         print('updating policy')
 
 
