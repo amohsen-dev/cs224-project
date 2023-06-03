@@ -106,5 +106,9 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
 if __name__ == '__main__':
     agent1 = PNNAgent()
     agent2 = PNNAgent()
-    path = play_random_game(agent1, agent2, verbose=False)
+    num_paths = 100
+    paths = []
+    for i in range(num_paths):
+        path = play_random_game(agent1, agent2, verbose=False)
+        paths.append(path)
     print('path generated')
