@@ -116,6 +116,7 @@ def calc_score_adj(pos, declarer, contract, trick, vuln, doubled):
 
     level, suit = int(contract[:-1]), SUIT_INDEX[contract[-1]]
 
+    print(f'calling calc_score with args ({level, suit, trick, vul, doubled, redoubled})')
     score = calc_score(level, suit, trick, vul, doubled, redoubled)
     if declarer in 'EW':
         score = -score
