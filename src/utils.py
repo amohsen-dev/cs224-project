@@ -1,4 +1,5 @@
 import os
+import asyncio
 import numpy as np
 import pandas as pd
 from compute_score import calc_score, calc_IMP
@@ -125,6 +126,18 @@ def eval_trick_from_game(players, game):
     if players == 'EW':
         trick = 13 - trick
     return trick
+
+async def eval_trick_from_game_async(game):
+    clin = json_to_lin_cards(game)
+    cmd = f'../solver/bcalconsole -e e -q -t a -d lin -c {clin}'
+    proc = await asyncio.create_subprocess_shell(
+        cmd,
+        stderr=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.PIPE
+    )
+
+    stdout, stderr = await proc.communicate()
+    return stdout
 
 def calc_score_adj(pos, declarer, contract, trick, vuln, doubled, verbose=False):
     if doubled == 'r':
