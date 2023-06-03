@@ -1,5 +1,6 @@
 import os
 import asyncio
+import torch
 import numpy as np
 import pandas as pd
 from compute_score import calc_score, calc_IMP
@@ -171,6 +172,32 @@ def calc_score_adj(pos, declarer, contract, trick, vuln, doubled, verbose=False)
     if verbose:
         print(f'score adjusted to {score}')
     return score
+
+class ENN(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.layers = torch.nn.Sequential(
+            torch.nn.Linear(372, 52),
+            torch.nn.ReLU(),
+            torch.nn.Linear(52, 52),
+            torch.nn.Sigmoid(),
+        )
+
+    def forward(self, x_b):
+        return self.layers(x_b)
+
+
+class PNN(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.layers = torch.nn.Sequential(
+            torch.nn.Linear(424, 200),
+            torch.nn.ReLU(),
+            torch.nn.Linear(200, 38)
+        )
+
+    def forward(self, x_b):
+        return self.layers(x_b)
 
 
 def calc_imp(x):
