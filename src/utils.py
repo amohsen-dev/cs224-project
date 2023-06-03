@@ -91,6 +91,30 @@ def json_to_lin_cards(dct):
     return ','.join(H)
 
 
+def get_info_from_game_and_bidders(game, bidding_players):
+    doubled = 0
+    contract = None
+    contract_bidder = None
+    declarer = None
+    if game['bids'] == ['p', 'p', 'p', 'p']:
+        print('GAME ABORTED ALL PASS')
+        return None, None, None
+    for bid, bidder in zip(game['bids'][::-1], bidding_players[::-1]):
+        if bid == 'd':
+            doubled = 1
+        if bid == 'r':
+            doubled = 2
+        if bid not in ['p', 'r', 'd']:
+            contract = bid
+            contract_bidder = 'EW' if bidder in 'EW' else 'NS'
+            break
+    if contract is not None:
+        contract_suit = contract[-1]
+        for bid, bidder in zip(game['bids'], bidding_players):
+            if bidder in contract_bidder and contract_suit == bid[-1]:
+                declarer = bidder
+                break
+    return contract, declarer, doubled
 def eval_trick_from_game(players, game):
     clin = json_to_lin_cards(game)
     ev = os.popen(f'../solver/bcalconsole -e e -q -t a -d lin -c {clin}').read()
