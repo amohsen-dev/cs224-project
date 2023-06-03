@@ -106,9 +106,13 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
 if __name__ == '__main__':
     agent1 = PNNAgent()
     agent2 = PNNAgent()
-    num_paths = 1000
+    num_paths = 100
     paths = []
     for i in tqdm(range(num_paths)):
-        path = play_random_game(agent1, agent2, verbose=False)
-        paths.append(path)
+        try:
+            path = play_random_game(agent1, agent2, verbose=False)
+            if path is not None:
+                paths.append(path)
+        except Exception as exception:
+            print(exception)
     print('path generated')
