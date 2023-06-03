@@ -30,15 +30,20 @@ class PNNAgent(Agent):
         self.model_pnn.load_state_dict(torch.load('../model_cache/model_pnn/model_pnn_19.data'))
 
     def bid(self, game):
-        x = extract_from_incomplete_game(game)
-        state = torch.from_numpy(np.concatenate(x[:3])).type(torch.float32)
-        partner_hand_estimation = self.model_enn(state)
-        pnn_input = torch.concat([state, partner_hand_estimation])
-        logits = self.model_pnn(pnn_input)
-        stoch_policy = Categorical(logits=logits)
-        action = stoch_policy.sample()
-        #log_prob = stoch_policy.log_prob(action)
-        bid = label_to_bid(int(action))
+        with torch.no_grad:
+            x = extract_from_incomplete_game(game)
+            state = torch.from_numpy(np.concatenate(x[:3])).type(torch.float32)
+            partner_hand_estimation = self.model_enn(state)
+            pnn_input = torch.concat([state, partner_hand_estimation])
+            pnn_input.requires_grad = False
+            logits = pnn_input
+            for layer in self.model_pnn.modules():
+                logits = layer(logits)
+            #logits = self.model_pnn(pnn_input)
+            stoch_policy = Categorical(logits=logits)
+            action = stoch_policy.sample()
+            #log_prob = stoch_policy.log_prob(action)
+            bid = label_to_bid(int(action))
         return state, bid
 
 class ConsoleAgent(Agent):
@@ -94,7 +99,7 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
         if verbose:
             print(json.dumps(game, indent=4))
         #trick = eval_trick_from_game(agent1_side, game)
-        trick = 0 #asyncio.run(eval_trick_from_game_async(agent1_side, game))
+        trick = asyncio.run(eval_trick_from_game_async(agent1_side, game))
         game_score = calc_score_adj(agent1_side, game['declarer'], game['contract'], trick, game['vuln'], game['doubled'], verbose)
         game_scores.append(game_score)
 
@@ -117,7 +122,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     tasks = []
     with ProcessPoolExecutor() as executor:
-        for number in range(64):
+        for number in range(1):
             task = partial(play_random_game, agent1=agent1, agent2=agent2, verbose=False)
             tasks.append( loop.run_in_executor(executor, task) )
     res, _ = loop.run_until_complete(asyncio.wait(tasks))
