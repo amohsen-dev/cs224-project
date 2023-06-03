@@ -163,11 +163,12 @@ if __name__ == '__main__':
 
     algorithm = PolicyGradient()
     imps, losses = [], []
-    for i in range(24):
+    for i in range(1000):
         paths = algorithm.generate_paths()
         imp, loss = algorithm.update_policy(paths)
         imps.append(imp)
         losses.append(loss)
-    print(np.cumsum(imps) / np.arange(len(imps)), losses)
+    print('IMP MEAN:')
+    print(np.cumsum(imps) / np.arange(len(imps)))
 
     print('path generated')
