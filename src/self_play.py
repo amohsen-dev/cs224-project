@@ -35,10 +35,7 @@ class PNNAgent(Agent):
             partner_hand_estimation = self.model_enn(state)
             pnn_input = torch.concat([state, partner_hand_estimation])
             pnn_input.requires_grad = False
-            logits = pnn_input
-            for layer in self.model_pnn.layers:
-                logits = layer(logits)
-            #logits = self.model_pnn(pnn_input)
+            logits = self.model_pnn(pnn_input)
             stoch_policy = Categorical(logits=logits)
             action = stoch_policy.sample()
             #log_prob = stoch_policy.log_prob(action)
@@ -118,8 +115,7 @@ if __name__ == '__main__':
     agent1 = PNNAgent()
     agent2 = PNNAgent()
 
-    test = play_random_game(agent1, agent2, False)
-    loop = asyncio.get_event_loop()
+    """loop = asyncio.get_event_loop()
     tasks = []
     with ProcessPoolExecutor() as executor:
         for number in range(1):
@@ -127,10 +123,9 @@ if __name__ == '__main__':
                            agent2=copy.deepcopy(agent2), verbose=False)
             tasks.append( loop.run_in_executor(executor, task) )
     res, _ = loop.run_until_complete(asyncio.wait(tasks))
-    loop.close()
-    print(res)
+    loop.close()"""
 
-    """    num_paths = 64
+    num_paths = 64
     paths = []
     for i in tqdm(range(num_paths)):
         try:
@@ -138,6 +133,6 @@ if __name__ == '__main__':
             if path is not None:
                 paths.append(path)
         except Exception as exception:
-            print(exception)"""
+            print(exception)
 
     print('path generated')
