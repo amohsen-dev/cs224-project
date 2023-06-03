@@ -125,8 +125,8 @@ class PolicyGradient:
         self.baseline_opt = torch.optim.Adam(self.baseline_net.parameters(), lr=1e-3)
     def generate_paths(self):
         paths = []
-        #for _ in tqdm(range(self.num_episodes)):
-        for _ in range(self.num_episodes):
+        for _ in tqdm(range(self.num_episodes)):
+        #for _ in range(self.num_episodes):
             try:
                 path = play_random_game(self.agent_target, self.agent_opponent, verbose=False)
                 if path is not None:
