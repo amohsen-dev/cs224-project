@@ -116,7 +116,9 @@ class PolicyGradient:
         self.agent_opponent = PNNAgent()
         self.baseline_net = BaselineNet()
         self.num_episodes = 8
+        self.num_epochs = 8
         self.gamma = 0.99
+        self.ppo_epsilon = 1e-1
         self.enn_opt = torch.optim.Adam(self.agent_target.model_enn.parameters(), lr=1e-3)
         self.pnn_opt = torch.optim.Adam(self.agent_target.model_pnn.parameters(), lr=1e-3)
         self.baseline_opt = torch.optim.Adam(self.baseline_net.parameters(), lr=1e-3)
@@ -132,31 +134,42 @@ class PolicyGradient:
                 pass  # print(exception)
         return paths
 
-    def update_policy(self, paths):
-        self.enn_opt.zero_grad()
-        self.pnn_opt.zero_grad()
-        loss = torch.Tensor([0]).type(torch.float32)
-        N = 0
-        imps = []
+    def update_policy(self, paths, PPO=False):
+        old_log_probs = []
         for path in paths:
-            path_len = len(path['rewards'])
-            imp = path['rewards'][-1]
-            imps.append(imp)
-            returns = np.power(self.gamma, np.arange(path_len)[::-1]) * imp
-            for state, action, ret in zip(path['states'], path['actions'], returns):
+            this_old_log_probs = []
+            for state, action, ret in zip(path['states'], path['actions']):
                 enn = self.agent_target.model_enn(state)
                 logits = self.agent_target.model_pnn(torch.cat([state, enn]))
                 dist = Categorical(logits=logits)
-                loss += - dist.log_prob(action) * ret
-                N += 1
-        loss = loss / N
-        print(np.mean(imps))
-        print(loss)
-        loss.backward()
-        self.enn_opt.step()
-        self.pnn_opt.step()
-        print('updating policy')
-        return np.mean(imps), float(loss.detach().numpy())
+                this_old_log_probs.append(dist.log_prob(action).detach())
+            old_log_probs.append(this_old_log_probs)
+
+        for epoch in range(self.num_epochs):
+            self.enn_opt.zero_grad()
+            self.pnn_opt.zero_grad()
+            loss = torch.Tensor([0]).type(torch.float32)
+            N = 0
+            for path, old_log_probss in zip(paths, old_log_probs):
+                path_len = len(path['rewards'])
+                returns = np.power(self.gamma, np.arange(path_len)[::-1]) * path['rewards'][-1]
+                for state, action, A, old_log_prob in zip(path['states'], path['actions'], returns, old_log_probss):
+                    enn = self.agent_target.model_enn(state)
+                    logits = self.agent_target.model_pnn(torch.cat([state, enn]))
+                    dist = Categorical(logits=logits)
+                    log_prob = dist.log_prob(action)
+                    if PPO:
+                        ratio = torch.exp(log_prob - old_log_prob)
+                        ratio_clipped = torch.clamp(ratio, 1 - self.ppo_epsilon, 1 + self.ppo_epsilon)
+                        loss += torch.min(ratio * A, ratio_clipped * A)
+                    else:
+                        loss += - log_prob * A
+                    N += 1
+            loss = loss / N
+            loss.backward()
+            self.enn_opt.step()
+            self.pnn_opt.step()
+        return None
 
 
 if __name__ == '__main__':
