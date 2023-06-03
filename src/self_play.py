@@ -171,7 +171,7 @@ class PolicyGradient:
             loss.backward()
             self.enn_opt.step()
             self.pnn_opt.step()
-            losses.append(loss.detach().numpy())
+            losses.append(loss.detach().numpy()[0])
         print(losses)
         imp = np.mean([p['rewards'][-1] for p in paths])
         return imp
