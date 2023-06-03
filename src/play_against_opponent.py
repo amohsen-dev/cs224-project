@@ -91,7 +91,7 @@ def play_random_game(agent1: Agent, agent2: Agent):
         game_scores.append(game_score)
 
     IMP = calc_imp(sum(game_scores))
-    path[-1][2] = IMP
+    path[-1] = (path[-1][0], path[-1][1], IMP)
     print('*' * 60 + f'  IMP = {IMP}  ' + '*' * 60)
 
     return path
