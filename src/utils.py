@@ -127,7 +127,7 @@ def eval_trick_from_game(players, game):
         trick = 13 - trick
     return trick
 
-async def eval_trick_from_game_async(game):
+async def eval_trick_from_game_async(players, game):
     clin = json_to_lin_cards(game)
     cmd = f'../solver/bcalconsole -e e -q -t a -d lin -c {clin}'
     proc = await asyncio.create_subprocess_shell(
@@ -137,7 +137,13 @@ async def eval_trick_from_game_async(game):
     )
 
     stdout, stderr = await proc.communicate()
-    return stdout
+    ev = [e.split() for e in stdout.split('\n')][:-1]
+    ev = pd.DataFrame(ev, columns=['leader', 'C', 'D', 'H', 'S', 'N']).set_index('leader').astype(np.int32)
+    ev.index = ev.index.map({'N': 'E', 'E': 'S', 'S': 'W', 'W': 'N'})
+    trick = ev.loc[game['declarer'], game['contract'][-1]]
+    if players == 'EW':
+        trick = 13 - trick
+    return trick
 
 def calc_score_adj(pos, declarer, contract, trick, vuln, doubled, verbose=False):
     if doubled == 'r':
