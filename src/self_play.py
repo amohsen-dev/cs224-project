@@ -29,7 +29,7 @@ class PNNAgent(Agent):
         self.model_pnn.load_state_dict(torch.load('../model_cache/model_pnn/model_pnn_19.data'))
 
     def bid(self, game):
-        with torch.no_grad:
+        with torch.no_grad():
             x = extract_from_incomplete_game(game)
             state = torch.from_numpy(np.concatenate(x[:3])).type(torch.float32)
             partner_hand_estimation = self.model_enn(state)
