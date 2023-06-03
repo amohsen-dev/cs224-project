@@ -122,9 +122,9 @@ if __name__ == '__main__':
             tasks.append( loop.run_in_executor(executor, dummy) )
     res, _ = loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
+    print(res)
 
-
-    num_paths = 64
+    """    num_paths = 64
     paths = []
     for i in tqdm(range(num_paths)):
         try:
@@ -132,6 +132,6 @@ if __name__ == '__main__':
             if path is not None:
                 paths.append(path)
         except Exception as exception:
-            print(exception)
+            print(exception)"""
 
     print('path generated')
