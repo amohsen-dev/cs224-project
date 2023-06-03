@@ -93,7 +93,8 @@ def play_random_game(agent1: Agent, agent2: Agent):
     IMP = calc_imp(sum(game_scores))
     path[-1] = (path[-1][0], path[-1][1], IMP)
     print('*' * 60 + f'  IMP = {IMP}  ' + '*' * 60)
-
+    if contract is None:
+        path = None
     return path
 
 
