@@ -103,16 +103,16 @@ def calc_score(level, suit, trick, vulnerable, doubled, redoubled):
         over_trick = trick - level - 6
         if redoubled:
             if vulnerable == 1:
-                score = duplicate_score_table[(level - 1) * 3 + int(suit) / 2][5] + over_trick * 400
+                score = duplicate_score_table[(level - 1) * 3 + int(suit) // 2][5] + over_trick * 400
             else:
-                score = duplicate_score_table[(level - 1) * 3 + int(suit) / 2][4] + over_trick * 200
+                score = duplicate_score_table[(level - 1) * 3 + int(suit) // 2][4] + over_trick * 200
         elif doubled:
             if vulnerable == 1:
-                score = duplicate_score_table[(level - 1) * 3 + int(suit) / 2][3] + over_trick * 200
+                score = duplicate_score_table[(level - 1) * 3 + int(suit) // 2][3] + over_trick * 200
             else:
-                score = duplicate_score_table[(level - 1) * 3 + int(suit) / 2][2] + over_trick * 100
+                score = duplicate_score_table[(level - 1) * 3 + int(suit) // 2][2] + over_trick * 100
         else:
-            score = duplicate_score_table[(level - 1) * 3 + int(suit) / 2][vulnerable]
+            score = duplicate_score_table[(level - 1) * 3 + int(suit) // 2][vulnerable]
             score += 30 * over_trick if suit >= Heart else 20 * over_trick
     else:
         under_trick = level + 6 - trick
@@ -128,37 +128,36 @@ def calc_score(level, suit, trick, vulnerable, doubled, redoubled):
             score = 50 * under_trick * (vulnerable + 1)
     return score if trick >= level + 6 else -score
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('Compute score')
     parser.add_argument('--pos1', type=int, default=-1,
                         help='pos1') #0 if we are N/S, 1 if we are E/W
     parser.add_argument('--level1', type=int, default=0,
-                        help='level1')
+                        help='level1') #1-7
     parser.add_argument('--suit1', type=int, default=-1,
-                        help='suit1')
+                        help='suit1') #0 for clubs, etc.
     parser.add_argument('--trick1', type=int, default=-1,
-                        help='trick1') #From N/S perspective
+                        help='trick1') #For declarer
     parser.add_argument('--declarer1', type=int, default=-1,
-                        help='declarer1')
+                        help='declarer1') #0 for North, etc.
     parser.add_argument('--vul1', type=int, default=-1,
-                        help='vul1')
+                        help='vul1') #1 if declarer vul, 0 if declarer not vul
     parser.add_argument('--doubled1', type=int, default=-1,
                         help='doubled1')
     parser.add_argument('--redoubled1', type=int, default=-1,
                         help='redoubled1')
     parser.add_argument('--pos2', type=int, default=-1,
-                        help='pos2')
+                        help='pos2') #0 if we are N/S, 1 if we are E/W
     parser.add_argument('--level2', type=int, default=0,
-                        help='level2')
+                        help='level2') #1-7
     parser.add_argument('--suit2', type=int, default=-1,
-                        help='suit2')
+                        help='suit2') #0 for clubs, etc.
     parser.add_argument('--trick2', type=int, default=-1,
-                        help='trick2') #From N/S perspective
+                        help='trick2') #For declarer
     parser.add_argument('--declarer2', type=int, default=-1,
-                        help='declarer2')
+                        help='declarer2') #0 for North, etc.
     parser.add_argument('--vul2', type=int, default=-1,
-                        help='vul2')
+                        help='vul2') #1 if declarer vul, 0 if declarer not vul
     parser.add_argument('--doubled2', type=int, default=-1,
                         help='doubled2')
     parser.add_argument('--redoubled2', type=int, default=-1,
@@ -184,16 +183,15 @@ if __name__ == "__main__":
     redoubled2 = args.redoubled2
     
     score1 = calc_score(level1, suit1, trick1, vul1, doubled1, redoubled1)
-    if declarer1 == East or declarer1 == West:
-        score1 = -score1
     if (pos1 - declarer1)%2 != 0:
         score1 = -score1
 
     score2 = calc_score(level2, suit2, trick2, vul2, doubled2, redoubled2)
-    if declarer2 == East or declarer2 == West:
-        score2 = -score2
     if (pos2 - declarer2)%2 != 0:
         score2 = -score2
+        
+    print(score1)
+    print(score2)
         
     result = calc_IMP(score1 + score2)   
     print(result)
