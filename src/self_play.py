@@ -118,8 +118,8 @@ if __name__ == '__main__':
     tasks = []
     with ProcessPoolExecutor() as executor:
         for number in range(64):
-            #task = partial(play_random_game, agent1=agent1, agent2=agent2, verbose=False)
-            tasks.append( loop.run_in_executor(executor, dummy) )
+            task = partial(play_random_game, agent1=agent1, agent2=agent2, verbose=False)
+            tasks.append( loop.run_in_executor(executor, task) )
     res, _ = loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
     print(res)
