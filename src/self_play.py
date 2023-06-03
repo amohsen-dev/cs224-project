@@ -68,7 +68,8 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
             if current_player in agent1_side:
                 state, bid = agent1.bid(game)
                 path['states'].append(state)
-                path['actions'].append(torch.Tensor(bid_to_label(bid)))
+                action = bid_to_label(bid)
+                path['actions'].append(torch.Tensor([action]).type(torch.int32))
                 path['rewards'].append(0)
                 if verbose:
                     print(f'{current_player} - agent1 bids: {bid}')
