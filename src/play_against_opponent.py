@@ -60,16 +60,18 @@ if __name__ == '__main__':
         contract_suit = None
         contract_bidder = None
         declarer = None
-        if game['bids'] != ['p', 'p', 'p', 'p']:
-            for bid, bidder in zip(game['bids'][::-1], bidding_player[::-1]):
-                if bid == 'd':
-                    doubled = 1
-                if bid == 'r':
-                    doubled = 2
-                if bid not in ['p', 'r', 'd']:
-                    contract = bid
-                    contract_bidder = 'EW' if bidder in 'EW' else 'NS'
-                    break
+        if game['bids'] == ['p', 'p', 'p', 'p']:
+            print('GAME ABORTED ALL PASS')
+            break
+        for bid, bidder in zip(game['bids'][::-1], bidding_player[::-1]):
+            if bid == 'd':
+                doubled = 1
+            if bid == 'r':
+                doubled = 2
+            if bid not in ['p', 'r', 'd']:
+                contract = bid
+                contract_bidder = 'EW' if bidder in 'EW' else 'NS'
+                break
         if contract is not None:
             contract_suit = contract[-1]
             for bid, bidder in zip(game['bids'], bidding_player):
