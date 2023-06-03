@@ -142,10 +142,12 @@ def calc_score_adj(pos, declarer, contract, trick, vuln, doubled):
 
     print(f'calling calc_score with args ({level, suit, trick, vul, doubled, redoubled})')
     score = calc_score(level, suit, trick, vul, doubled, redoubled)
+    print(f'received score {score}')
     if declarer in 'EW':
         score = -score
     if ((pos in 'EW') and (declarer in 'NS')) or ((pos in 'NS') or (declarer in 'EW')):
         score = -score
+    print(f'score adjusted to {score}')
     return score
 
 
