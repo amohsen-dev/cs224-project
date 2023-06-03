@@ -8,7 +8,7 @@ from tqdm import tqdm
 from functools import partial
 from abc import abstractmethod
 from concurrent.futures import ProcessPoolExecutor
-from utils import ENN, PNN, calc_score_adj, calc_imp, eval_trick_from_game, get_info_from_game_and_bidders, eval_trick_from_game_async
+from utils import ENN, PNN, BaselineNet, calc_score_adj, calc_imp, eval_trick_from_game, get_info_from_game_and_bidders, eval_trick_from_game_async
 from utils import generate_random_game, label_to_bid, bid_to_label
 from extract_features import extract_from_incomplete_game
 from torch.distributions.categorical import Categorical
@@ -114,10 +114,12 @@ class PolicyGradient:
     def __init__(self):
         self.agent_target = PNNAgent()
         self.agent_opponent = PNNAgent()
+        self.baseline_net = BaselineNet()
         self.num_episodes = 8
         self.gamma = 0.9
         self.enn_opt = torch.optim.Adam(self.agent_target.model_enn.parameters(), lr=1e-3)
         self.pnn_opt = torch.optim.Adam(self.agent_target.model_pnn.parameters(), lr=1e-3)
+        self.baseline_opt = torch.optim.Adam(self.baseline_net.parameters(), lr=1e-3)
     def generate_paths(self):
         paths = []
         #for _ in tqdm(range(self.num_episodes)):
@@ -135,9 +137,12 @@ class PolicyGradient:
         self.pnn_opt.zero_grad()
         loss = torch.Tensor([0]).type(torch.float32)
         N = 0
+        imps = []
         for path in paths:
             path_len = len(path['rewards'])
-            returns = np.power(self.gamma, np.arange(path_len)[::-1]) * path['rewards'][-1]
+            imp = path['rewards'][-1]
+            imps.append(imp)
+            returns = np.power(self.gamma, np.arange(path_len)[::-1]) * imp
             for state, action, ret in zip(path['states'], path['actions'], returns):
                 enn = self.agent_target.model_enn(state)
                 logits = self.agent_target.model_pnn(torch.cat([state, enn]))
@@ -145,6 +150,7 @@ class PolicyGradient:
                 loss += - dist.log_prob(action) * ret
                 N += 1
         loss = loss / N
+        print(np.mean(imps))
         print(loss)
         loss.backward()
         self.enn_opt.step()

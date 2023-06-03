@@ -2,36 +2,8 @@ import torch
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
+from utils import  ENN, PNN
 from torch.utils.tensorboard import SummaryWriter
-
-
-class ENN(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.layers = torch.nn.Sequential(
-            torch.nn.Linear(372, 52),
-            torch.nn.ReLU(),
-            torch.nn.Linear(52, 52),
-            torch.nn.Sigmoid(),
-        )
-
-    def forward(self, x_b):
-        return self.layers(x_b)
-
-
-class PNN(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.layers = torch.nn.Sequential(
-            torch.nn.Linear(424, 50),
-            torch.nn.ReLU(),
-            torch.nn.Linear(50, 37),
-            torch.nn.Sigmoid(),
-        )
-
-    def forward(self, x_b):
-        return self.layers(x_b)
-
 
 def get_dummy_data():
     x_train = np.random.randint(0, 2, n * (52 + 2 + 318)).reshape(n, -1)

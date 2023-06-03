@@ -173,6 +173,17 @@ def calc_score_adj(pos, declarer, contract, trick, vuln, doubled, verbose=False)
         print(f'score adjusted to {score}')
     return score
 
+
+class BaselineNet(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.layers = torch.nn.Sequential(
+            torch.nn.Linear(424, 64),
+            torch.nn.ReLU(),
+            torch.nn.Linear(64, 1)
+        )
+
+
 class ENN(torch.nn.Module):
     def __init__(self):
         super().__init__()
