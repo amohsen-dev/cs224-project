@@ -1,5 +1,6 @@
-import json
+import os
 import numpy as np
+import pandas as pd
 from compute_score import calc_score, calc_IMP
 from itertools import product
 
@@ -89,6 +90,17 @@ def json_to_lin_cards(dct):
         H.append(hhh)
     return ','.join(H)
 
+
+def eval_trick_from_game(players, game):
+    clin = json_to_lin_cards(game)
+    ev = os.popen(f'../solver/bcalconsole -e e -q -t a -d lin -c {clin}').read()
+    ev = [e.split() for e in ev.split('\n')][:-1]
+    ev = pd.DataFrame(ev, columns=['leader', 'C', 'D', 'H', 'S', 'N']).set_index('leader').astype(np.int32)
+    ev.index = ev.index.map({'N': 'E', 'E': 'S', 'S': 'W', 'W': 'N'})
+    trick = ev.loc[game['declarer'], game['contract'][-1]]
+    if players == 'EW':
+        trick = 13 - trick
+    return trick
 
 def calc_score_adj(pos, declarer, contract, trick, vuln, doubled):
     if doubled == 'r':

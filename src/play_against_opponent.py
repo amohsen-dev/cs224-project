@@ -4,7 +4,7 @@ import copy
 import torch
 import numpy as np
 import pandas as pd
-from utils import json_to_lin_cards, calc_score_adj, calc_imp
+from utils import json_to_lin_cards, calc_score_adj, calc_imp, eval_trick_from_game
 from behavioral_cloning_test import ENN, PNN
 from utils import generate_random_game, label_to_bid, bid_to_label
 from extract_features import extract_from_incomplete_game 
@@ -57,6 +57,7 @@ if __name__ == '__main__':
         
         doubled = 0
         contract = None
+        contract_suit = None
         contract_bidder = None
         declarer = None
         if game['bids'] != ['p', 'p', 'p', 'p']:
@@ -84,14 +85,7 @@ if __name__ == '__main__':
         print('\n')
         print('bidding players: ', bidding_player)
         print('bidding sequence: ', game['bids'])
-        clin = json_to_lin_cards(game)
-        ev = os.popen(f'../solver/bcalconsole -e e -q -t a -d lin -c {clin}').read()
-        ev = [e.split() for e in ev.split('\n')][:-1]
-        ev = pd.DataFrame(ev, columns=['leader', 'C', 'D', 'H', 'S', 'N']).set_index('leader').astype(np.int32)
-        ev.index = ev.index.map({'N': 'E', 'E': 'S', 'S': 'W', 'W': 'N'})
-        trick = ev.loc[declarer, contract_suit]
-        if robot_players == 'EW':
-            trick = 13 - trick
+        trick = eval_trick_from_game(robot_players, game)
         print('Theoretical tricks:')
         kwargs_cs = {
             'pos': robot_players,
