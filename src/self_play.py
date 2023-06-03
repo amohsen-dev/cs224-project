@@ -3,6 +3,7 @@ import json
 import copy
 import torch
 import asyncio
+import argparse
 import numpy as np
 from tqdm import tqdm
 from functools import partial
@@ -145,6 +146,7 @@ class PolicyGradient:
                 this_old_log_probs.append(dist.log_prob(action).detach())
             old_log_probs.append(this_old_log_probs)
 
+        losses = []
         for epoch in range(self.num_epochs):
             self.enn_opt.zero_grad()
             self.pnn_opt.zero_grad()
@@ -169,19 +171,24 @@ class PolicyGradient:
             loss.backward()
             self.enn_opt.step()
             self.pnn_opt.step()
-        return None
+            losses.append(loss.detach().numpy())
+        print(losses)
+        imp = np.mean([p['rewards'][-1] for p in paths])
+        return imp
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--ppo', action='store_true')
+    args = parser.parse_args()
 
     algorithm = PolicyGradient()
     imps, losses = [], []
     for i in range(1000):
         paths = algorithm.generate_paths()
-        imp, loss = algorithm.update_policy(paths)
+        imp = algorithm.update_policy(paths, PPO=args.ppo)
         imps.append(imp)
-        losses.append(loss)
     print('IMP MEAN:')
-    print(np.cumsum(imps) / np.arange(len(imps)))
+    print(np.cumsum(imps))
 
     print('path generated')
