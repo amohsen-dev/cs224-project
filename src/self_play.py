@@ -186,9 +186,10 @@ if __name__ == '__main__':
     imps, losses = [], []
     for i in range(1000):
         paths = algorithm.generate_paths()
-        imp = algorithm.update_policy(paths, PPO=args.ppo)
-        imps.append(imp)
+        if len(paths) > 0:
+            imp = algorithm.update_policy(paths, PPO=args.ppo)
+            imps.append(imp)
     print('IMP MEAN:')
-    print(np.cumsum(imps))
+    print(np.cumsum(imps) / np.arange(len(imps)))
 
     print('path generated')
