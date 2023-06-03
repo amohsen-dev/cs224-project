@@ -2,9 +2,12 @@ import os
 import json
 import copy
 import torch
+import asyncio
 import numpy as np
 from tqdm import tqdm
+from functools import partial
 from abc import abstractmethod
+from concurrent.futures import ProcessPoolExecutor
 from utils import calc_score_adj, calc_imp, eval_trick_from_game, get_info_from_game_and_bidders
 from behavioral_cloning_test import ENN, PNN
 from utils import generate_random_game, label_to_bid, bid_to_label
@@ -102,11 +105,25 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
         path = None
     return path
 
+def dummy():
+    return 1
 
 if __name__ == '__main__':
+
     agent1 = PNNAgent()
     agent2 = PNNAgent()
-    num_paths = 100
+
+    loop = asyncio.get_event_loop()
+    tasks = []
+    with ProcessPoolExecutor() as executor:
+        for number in range(64):
+            task = partial(play_random_game, agent1=agent1, agent2=agent2, verbose=False)
+            tasks.append( loop.run_in_executor(executor, task) )
+    res, _ = loop.run_until_complete(asyncio.wait(tasks))
+    loop.close()
+
+
+    num_paths = 64
     paths = []
     for i in tqdm(range(num_paths)):
         try:
@@ -115,4 +132,5 @@ if __name__ == '__main__':
                 paths.append(path)
         except Exception as exception:
             print(exception)
+
     print('path generated')
