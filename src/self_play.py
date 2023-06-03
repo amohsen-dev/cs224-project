@@ -9,7 +9,6 @@ from functools import partial
 from abc import abstractmethod
 from concurrent.futures import ProcessPoolExecutor
 from utils import ENN, PNN, calc_score_adj, calc_imp, eval_trick_from_game, get_info_from_game_and_bidders, eval_trick_from_game_async
-from behavioral_cloning_test import ENN, PNN
 from utils import generate_random_game, label_to_bid, bid_to_label
 from extract_features import extract_from_incomplete_game
 from torch.distributions.categorical import Categorical
