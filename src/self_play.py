@@ -132,7 +132,7 @@ class PolicyGradient:
                 if path is not None:
                     paths.append(path)
             except Exception as exception:
-                pass  # print(exception)
+                print(exception)
         return paths
 
     def update_policy(self, paths, PPO=False):
