@@ -36,7 +36,7 @@ class PNNAgent(Agent):
             pnn_input = torch.concat([state, partner_hand_estimation])
             pnn_input.requires_grad = False
             logits = pnn_input
-            for layer in self.model_pnn.children():
+            for layer in self.model_pnn.layers.modules():
                 logits = layer(logits)
             #logits = self.model_pnn(pnn_input)
             stoch_policy = Categorical(logits=logits)
