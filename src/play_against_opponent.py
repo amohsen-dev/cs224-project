@@ -28,22 +28,22 @@ class PNNAgent(Agent):
 
     def bid(self, game):
         x = extract_from_incomplete_game(game)
-        enn_input = torch.from_numpy(np.concatenate(x[:3])).type(torch.float32)
-        partner_hand_estimation = self.model_enn(enn_input)
-        pnn_input = torch.concat([enn_input, partner_hand_estimation])
+        state = torch.from_numpy(np.concatenate(x[:3])).type(torch.float32)
+        partner_hand_estimation = self.model_enn(state)
+        pnn_input = torch.concat([state, partner_hand_estimation])
         logits = self.model_pnn(pnn_input)
-        stoch_policy = Categorical(probs=torch.nn.Softmax(dim=0)(logits))
+        stoch_policy = Categorical(logits=logits)
         action = stoch_policy.sample()
-        log_prob = stoch_policy.log_prob(action)
-        bid = label_to_bid(action)
-        return bid, log_prob
+        #log_prob = stoch_policy.log_prob(action)
+        bid = label_to_bid(int(action))
+        return state, bid
 
 class ConsoleAgent(Agent):
     def bid(self, game):
         bid = ''
         while len(bid) == 0:
             bid = input(f'{self.__repr__()} - Enter opponent bid: ')
-        return bid, None
+        return None, bid
 
 def play_random_game(agent1: Agent, agent2: Agent):
     game1 = generate_random_game()
@@ -51,6 +51,7 @@ def play_random_game(agent1: Agent, agent2: Agent):
 
     print(json.dumps(game1, indent=4))
     game_scores = []
+    path = []
     for agent1_side, game in zip(['EW', 'NS'], [game1, game2]):
         npasses = 0
         bidding_player = []
@@ -59,10 +60,11 @@ def play_random_game(agent1: Agent, agent2: Agent):
         print(f'PNN as {agent1_side} playing against oppenent')
         while True:
             if current_player in agent1_side:
-                bid, _ = agent1.bid(game)
+                state, bid = agent1.bid(game)
+                path.append((state, bid_to_label(bid), 0))
                 print(f'{current_player} - agent1 bids: {bid}')
             else:
-                bid, _ = agent2.bid(game)
+                _, bid = agent2.bid(game)
             if bid == 'p' and (npasses < 2 or len(game['bids']) == 2):
                 npasses += 1
             elif bid == 'p':
@@ -89,7 +91,10 @@ def play_random_game(agent1: Agent, agent2: Agent):
         game_scores.append(game_score)
 
     IMP = calc_imp(sum(game_scores))
+    path[-1][2] = IMP
     print('*' * 60 + f'  IMP = {IMP}  ' + '*' * 60)
+
+    return path
 
 
 if __name__ == '__main__':
