@@ -56,7 +56,7 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
     if verbose:
         print(json.dumps(game1, indent=4))
     game_scores = []
-    path = []
+    path = {'states': [], 'actions': [], 'rewards': []}
     for agent1_side, game in zip(['EW', 'NS'], [game1, game2]):
         npasses = 0
         bidding_player = []
@@ -67,7 +67,9 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
         while True:
             if current_player in agent1_side:
                 state, bid = agent1.bid(game)
-                path.append((state, bid_to_label(bid), 0))
+                path['states'].append(state)
+                path['actions'].append(bid_to_label(bid))
+                path['rewards'].append(0)
                 if verbose:
                     print(f'{current_player} - agent1 bids: {bid}')
             else:
@@ -100,39 +102,37 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
         game_scores.append(game_score)
 
     IMP = calc_imp(sum(game_scores))
-    path[-1] = (path[-1][0], path[-1][1], IMP)
+    path['rewards'][-1] = IMP
     if verbose:
         print('*' * 60 + f'  IMP = {IMP}  ' + '*' * 60)
     if contract is None:
         path = None
     return path
 
-def dummy():
-    return 1
+class PolicyGradient:
+    def __init__(self):
+        self.agent_target = PNNAgent()
+        self.agent_opponent = PNNAgent()
+        self.num_episodes = 16
+    def generate_paths(self):
+        paths = []
+        for _ in tqdm(range(self.num_episodes)):
+            try:
+                path = play_random_game(self.agent_target, self.agent_opponent, verbose=False)
+                if path is not None:
+                    paths.append(path)
+            except Exception as exception:
+                print(exception)
+        return paths
+
+    def update_policy(self, paths):
+        print('updating policy')
+
 
 if __name__ == '__main__':
 
-    agent1 = PNNAgent()
-    agent2 = PNNAgent()
-
-    """loop = asyncio.get_event_loop()
-    tasks = []
-    with ProcessPoolExecutor() as executor:
-        for number in range(1):
-            task = partial(play_random_game, agent1=copy.deepcopy(agent1),
-                           agent2=copy.deepcopy(agent2), verbose=False)
-            tasks.append( loop.run_in_executor(executor, task) )
-    res, _ = loop.run_until_complete(asyncio.wait(tasks))
-    loop.close()"""
-
-    num_paths = 64
-    paths = []
-    for i in tqdm(range(num_paths)):
-        try:
-            path = play_random_game(agent1, agent2, verbose=False)
-            if path is not None:
-                paths.append(path)
-        except Exception as exception:
-            print(exception)
+    algorithm = PolicyGradient()
+    paths = algorithm.generate_paths()
+    algorithm.update_policy(paths)
 
     print('path generated')
