@@ -3,9 +3,9 @@ import json
 import copy
 import torch
 import numpy as np
-import pandas as pd
+from tqdm import tqdm
 from abc import abstractmethod
-from utils import json_to_lin_cards, calc_score_adj, calc_imp, eval_trick_from_game, get_info_from_game_and_bidders
+from utils import calc_score_adj, calc_imp, eval_trick_from_game, get_info_from_game_and_bidders
 from behavioral_cloning_test import ENN, PNN
 from utils import generate_random_game, label_to_bid, bid_to_label
 from extract_features import extract_from_incomplete_game
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     agent2 = PNNAgent()
     num_paths = 1000
     paths = []
-    for i in range(num_paths):
+    for i in tqdm(range(num_paths)):
         try:
             path = play_random_game(agent1, agent2, verbose=False)
             if path is not None:
