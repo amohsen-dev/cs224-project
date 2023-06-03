@@ -116,7 +116,7 @@ class PolicyGradient:
         self.agent_opponent = PNNAgent()
         self.baseline_net = BaselineNet()
         self.num_episodes = 8
-        self.gamma = 0.9
+        self.gamma = 0.99
         self.enn_opt = torch.optim.Adam(self.agent_target.model_enn.parameters(), lr=1e-3)
         self.pnn_opt = torch.optim.Adam(self.agent_target.model_pnn.parameters(), lr=1e-3)
         self.baseline_opt = torch.optim.Adam(self.baseline_net.parameters(), lr=1e-3)
@@ -156,13 +156,18 @@ class PolicyGradient:
         self.enn_opt.step()
         self.pnn_opt.step()
         print('updating policy')
+        return np.mean(imps), float(loss.detach().numpy())
 
 
 if __name__ == '__main__':
 
     algorithm = PolicyGradient()
+    imps, losses = [], []
     for i in range(24):
         paths = algorithm.generate_paths()
-        algorithm.update_policy(paths)
+        imp, loss = algorithm.update_policy(paths)
+        imps.append(imp)
+        losses.append(loss)
+    print(np.cummean(imps), losses)
 
     print('path generated')
