@@ -96,7 +96,6 @@ if __name__ == '__main__':
             'doubled': game['doubled']}
         game_score = calc_score_adj(**kwargs_cs)
         game_scores.append(game_score)
-        print(ev)
 
     IMP = calc_imp(sum(game_scores))
     print('*' * 60 + f'  IMP = {IMP}  ' + '*' * 60)
