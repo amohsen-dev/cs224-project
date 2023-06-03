@@ -189,7 +189,7 @@ if __name__ == '__main__':
         if len(paths) > 0:
             imp = algorithm.update_policy(paths, PPO=args.ppo)
             imps.append(imp)
-    print('IMP MEAN:')
-    print(np.cumsum(imps) / np.arange(len(imps)))
+        print('IMP MEAN:')
+        print(np.cumsum(imps) / np.arange(len(imps)))
 
     print('path generated')
