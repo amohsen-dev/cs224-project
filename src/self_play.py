@@ -109,10 +109,6 @@ if __name__ == '__main__':
     num_paths = 1000
     paths = []
     for i in tqdm(range(num_paths)):
-        try:
-            path = play_random_game(agent1, agent2, verbose=False)
-            if path is not None:
-                paths.append(path)
-        except Exception as exception:
-            print(exception)
+        path = play_random_game(agent1, agent2, verbose=False)
+        paths.append(path)
     print('path generated')
