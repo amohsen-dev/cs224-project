@@ -8,7 +8,8 @@ from abc import abstractmethod
 from utils import json_to_lin_cards, calc_score_adj, calc_imp, eval_trick_from_game, get_info_from_game_and_bidders
 from behavioral_cloning_test import ENN, PNN
 from utils import generate_random_game, label_to_bid, bid_to_label
-from extract_features import extract_from_incomplete_game 
+from extract_features import extract_from_incomplete_game
+from troch.distributions.categorical import Categorical
 
 PLAYERS = ['S', 'W', 'N', 'E']
 
@@ -30,10 +31,12 @@ class PNNAgent(Agent):
         enn_input = torch.from_numpy(np.concatenate(x[:3])).type(torch.float32)
         partner_hand_estimation = self.model_enn(enn_input)
         pnn_input = torch.concat([enn_input, partner_hand_estimation])
-        action = self.model_pnn(pnn_input)
-        bid_raw = int(torch.nn.Softmax(dim=0)(action).argmax(dim=0))
-        bid = label_to_bid(bid_raw)
-        return bid, bid_raw
+        logits = self.model_pnn(pnn_input)
+        stoch_policy = Categorical(probs=torch.nn.Softmax(dim=0)(logits))
+        action = stoch_policy.sample()
+        log_prob = stoch_policy.log_prob(action)
+        bid = label_to_bid(action)
+        return bid, log_prob
 
 class ConsoleAgent(Agent):
     def bid(self, game):
