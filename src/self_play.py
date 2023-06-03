@@ -118,11 +118,13 @@ if __name__ == '__main__':
     agent1 = PNNAgent()
     agent2 = PNNAgent()
 
+    test = play_random_game(agent1, agent2, False)
     loop = asyncio.get_event_loop()
     tasks = []
     with ProcessPoolExecutor() as executor:
         for number in range(1):
-            task = partial(play_random_game, agent1=agent1, agent2=agent2, verbose=False)
+            task = partial(play_random_game, agent1=copy.deepcopy(agent1),
+                           agent2=copy.deepcopy(agent2), verbose=False)
             tasks.append( loop.run_in_executor(executor, task) )
     res, _ = loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
