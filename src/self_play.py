@@ -128,7 +128,7 @@ class PolicyGradient:
 
     def update_policy(self, paths):
         for path in paths:
-            loss = torch.Tensor(0)
+            loss = torch.Tensor([0]).type(torch.float32)
             for state, action in zip(path['states'], path['actions']):
                 enn = self.agent_target.model_enn(state)
                 logits = self.agent_target.model_pnn(torch.cat([state, enn]))
