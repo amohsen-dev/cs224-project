@@ -139,7 +139,7 @@ class PolicyGradient:
         old_log_probs = []
         for path in paths:
             this_old_log_probs = []
-            for state, action, ret in zip(path['states'], path['actions']):
+            for state, action in zip(path['states'], path['actions']):
                 enn = self.agent_target.model_enn(state)
                 logits = self.agent_target.model_pnn(torch.cat([state, enn]))
                 dist = Categorical(logits=logits)
