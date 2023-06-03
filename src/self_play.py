@@ -119,13 +119,14 @@ class PolicyGradient:
         self.pnn_opt = torch.optim.Adam(self.agent_target.model_pnn.parameters(), lr=1e-3)
     def generate_paths(self):
         paths = []
-        for _ in tqdm(range(self.num_episodes)):
+        #for _ in tqdm(range(self.num_episodes)):
+        for _ in range(self.num_episodes):
             try:
                 path = play_random_game(self.agent_target, self.agent_opponent, verbose=False)
                 if path is not None:
                     paths.append(path)
             except Exception as exception:
-                print(exception)
+                pass  # print(exception)
         return paths
 
     def update_policy(self, paths):
@@ -137,7 +138,7 @@ class PolicyGradient:
                 enn = self.agent_target.model_enn(state)
                 logits = self.agent_target.model_pnn(torch.cat([state, enn]))
                 dist = Categorical(logits=logits)
-                loss += dist.log_prob(action) * path['rewards'][-1]
+                loss += - dist.log_prob(action) * path['rewards'][-1]
         print(loss)
         loss.backward()
         self.enn_opt.step()
