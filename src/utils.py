@@ -1,6 +1,6 @@
 import json
 import numpy as np
-from compute_score import calc_score
+from compute_score import calc_score, calc_IMP
 from itertools import product
 
 NUM_PLAYERS = 4
@@ -110,6 +110,10 @@ def calc_score_adj(pos, declarer, contract, trick, vuln, doubled):
     if ((pos in 'EW') and (declarer in 'NS')) or ((pos in 'NS') or (declarer in 'EW')):
         score = -score
     return score
+
+
+def calc_imp(x):
+    return calc_IMP(x)
 
 
 if __name__ == '__main__':

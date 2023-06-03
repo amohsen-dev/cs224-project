@@ -3,7 +3,8 @@ import json
 import copy
 import torch
 import numpy as np
-from utils import json_to_lin_cards, calc_score_adj
+import pandas as pd
+from utils import json_to_lin_cards, calc_score_adj, calc_imp
 from behavioral_cloning_test import ENN, PNN
 from utils import generate_random_game, label_to_bid, bid_to_label
 from extract_features import extract_from_incomplete_game 
@@ -20,6 +21,7 @@ if __name__ == '__main__':
     model_pnn.load_state_dict( torch.load( '../model_cache/model_pnn/model_pnn_19.data' ) )
 
     print(json.dumps(game1, indent=4))
+    game_scores = []
     for robot_players, game in zip(['EW', 'NS'], [game1, game2]):
         npasses = 0
         bidding_player = []
@@ -83,8 +85,13 @@ if __name__ == '__main__':
         print('bidding players: ', bidding_player)
         print('bidding sequence: ', game['bids'])
         clin = json_to_lin_cards(game)
-        ev = os.popen(f'solver/bcalconsole -e e -q -t a -d lin -c {clin}').read()
-        trick = None
+        ev = os.popen(f'../solver/bcalconsole -e e -q -t a -d lin -c {clin}').read()
+        ev = [e.split() for e in ev.split('\n')][:-1]
+        ev = pd.DataFrame(ev, columns=['leader', 'C', 'D', 'H', 'S', 'N']).set_index('leader').astype(np.int32)
+        ev.index = ev.index.map({'N': 'E', 'E': 'S', 'S': 'W', 'W': 'N'})
+        trick = ev.loc[declarer, contract_suit]
+        if robot_players == 'EW':
+            trick = 13 - trick
         print('Theoretical tricks:')
         kwargs_cs = {
             'pos': robot_players,
@@ -94,4 +101,8 @@ if __name__ == '__main__':
             'vuln': game['vuln'],
             'doubled': game['doubled']}
         game_score = calc_score_adj(**kwargs_cs)
+        game_scores.append(game_score)
         print(ev)
+
+    IMP = calc_imp(sum(game_scores))
+    print('*' * 60 + f'  IMP = {IMP}  ' + '*' * 60)
