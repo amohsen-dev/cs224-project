@@ -1,5 +1,6 @@
 import json
 import numpy as np
+from compute_score import calc_score
 from itertools import product
 
 NUM_PLAYERS = 4
@@ -87,6 +88,29 @@ def json_to_lin_cards(dct):
             hhh += s + ''.join(hh[s])
         H.append(hhh)
     return ','.join(H)
+
+
+def calc_score_adj(pos, declarer, contract, trick, vuln, doubled):
+    if doubled == 'r':
+        doubled, redoubled = 0, 1
+    elif doubled == 'd':
+        doubled, redoubled = 1, 0
+    else:
+        doubled, redoubled = 0, 0
+
+    vul = 0
+    if vuln == 'both' or (pos in vuln):
+        vul = 1
+
+    level, suit = int(contract[:-1]), SUIT_INDEX[contract[-1]]
+
+    score = calc_score(level, suit, trick, vul, doubled, redoubled)
+    if declarer in 'EW':
+        score = -score
+    if ((pos in 'EW') and (declarer in 'NS')) or ((pos in 'NS') or (declarer in 'EW')):
+        score = -score
+    return score
+
 
 if __name__ == '__main__':
     l = bid_to_label('3H')

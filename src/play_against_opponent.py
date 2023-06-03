@@ -3,7 +3,7 @@ import json
 import copy
 import torch
 import numpy as np
-from utils import json_to_lin_cards
+from utils import json_to_lin_cards, calc_score_adj
 from behavioral_cloning_test import ENN, PNN
 from utils import generate_random_game, label_to_bid, bid_to_label
 from extract_features import extract_from_incomplete_game 
@@ -16,8 +16,8 @@ if __name__ == '__main__':
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model_enn = ENN().to(device)
     model_pnn = PNN().to(device)
-    model_enn.load_state_dict( torch.load( 'model_cache/model_372_52_e5/model_enn_19.data' ) )
-    model_pnn.load_state_dict( torch.load( 'model_cache/model_pnn/model_pnn_19.data' ) )
+    model_enn.load_state_dict( torch.load( '../model_cache/model_372_52_e5/model_enn_19.data' ) )
+    model_pnn.load_state_dict( torch.load( '../model_cache/model_pnn/model_pnn_19.data' ) )
 
     print(json.dumps(game1, indent=4))
     for robot_players, game in zip(['EW', 'NS'], [game1, game2]):
@@ -84,5 +84,14 @@ if __name__ == '__main__':
         print('bidding sequence: ', game['bids'])
         clin = json_to_lin_cards(game)
         ev = os.popen(f'solver/bcalconsole -e e -q -t a -d lin -c {clin}').read()
+        trick = None
         print('Theoretical tricks:')
+        kwargs_cs = {
+            'pos': robot_players,
+            'declarer': game['declarer'],
+            'contract': game['contract'],
+            'trick': trick,
+            'vuln': game['vuln'],
+            'doubled': game['doubled']}
+        game_score = calc_score_adj(**kwargs_cs)
         print(ev)

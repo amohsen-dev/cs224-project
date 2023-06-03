@@ -128,6 +128,7 @@ def calc_score(level, suit, trick, vulnerable, doubled, redoubled):
             score = 50 * under_trick * (vulnerable + 1)
     return score if trick >= level + 6 else -score
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('Compute score')
     parser.add_argument('--pos1', type=int, default=-1,
