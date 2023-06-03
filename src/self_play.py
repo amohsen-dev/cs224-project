@@ -168,6 +168,6 @@ if __name__ == '__main__':
         imp, loss = algorithm.update_policy(paths)
         imps.append(imp)
         losses.append(loss)
-    print(np.cummean(imps), losses)
+    print(np.cumsum(imps) / np.arange(len(imps)), losses)
 
     print('path generated')
