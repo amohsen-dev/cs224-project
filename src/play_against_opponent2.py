@@ -40,7 +40,7 @@ class ConsoleAgent(Agent):
         bid = ''
         while len(bid) == 0:
             bid = input(f'{self.__repr__()} - Enter opponent bid: ')
-        return bid
+        return bid, None
 
 def play_random_game(agent1: Agent, agent2: Agent):
     game1 = generate_random_game()
