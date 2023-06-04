@@ -191,7 +191,7 @@ class PolicyGradient:
                     if PPO:
                         ratio = torch.exp(log_prob - old_log_prob)
                         ratio_clipped = torch.clamp(ratio, 1 - self.ppo_epsilon, 1 + self.ppo_epsilon)
-                        loss += torch.min(ratio * A, ratio_clipped * A)
+                        loss += - torch.min(ratio * A, ratio_clipped * A)
                     else:
                         loss += - log_prob * A
                     N += 1
