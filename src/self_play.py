@@ -126,7 +126,7 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
         IMP = calc_imp(sum(game_scores))
     except BridgeRuleViolation:
         if target_violation:
-            IMP = -100
+            IMP = -24
         else:
             raise BridgeRuleViolation()
 
