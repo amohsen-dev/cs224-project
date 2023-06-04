@@ -10,7 +10,7 @@ from tqdm import tqdm
 from functools import partial
 from abc import abstractmethod
 from concurrent.futures import ProcessPoolExecutor
-from utils import ENN, PNN, BaselineNet, calc_score_adj, calc_imp, get_info_from_game_and_bidders, eval_trick_from_game_async
+from utils import ENN, PNN, PNN2, BaselineNet, calc_score_adj, calc_imp, get_info_from_game_and_bidders, eval_trick_from_game_async
 from utils import generate_random_game, label_to_bid, bid_to_label, MAX_ITER, MaxIterException, BridgeRuleViolation
 from extract_features import extract_from_incomplete_game
 from torch.distributions.categorical import Categorical
@@ -27,10 +27,11 @@ class PNNAgent(Agent):
     def __init__(self,
                  path_enn='../model_cache/model_372_52_e5/model_enn_19.data',
                  path_pnn='../model_cache/model_pnn/model_pnn_19.data',
+                 pnn2=False,
                  stochastic=True):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.model_enn = ENN().to(self.device)
-        self.model_pnn = PNN().to(self.device)
+        self.model_pnn = PNN().to(self.device) if not pnn2 else PNN2().to(self.device)
         self.model_enn.load_state_dict(torch.load(path_enn))
         self.model_pnn.load_state_dict(torch.load(path_pnn))
         self.stochastic = stochastic
