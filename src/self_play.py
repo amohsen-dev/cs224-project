@@ -58,60 +58,82 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
         print(json.dumps(game1, indent=4))
     game_scores = []
     path = {'states': [], 'actions': [], 'rewards': []}
-    for agent1_side, game in zip(['EW', 'NS'], [game1, game2]):
-        npasses = 0
-        bidding_player = []
-        current_player = game['dealer']
-        current_index = PLAYERS.index(current_player)
-        if verbose:
-            print(f'PNN as {agent1_side} playing against oppenent')
-        it = 0
-        while True:
-            if current_player in agent1_side:
-                state, bid = agent1.bid(game)
-                path['states'].append(state)
-                action = bid_to_label(bid)
-                path['actions'].append(torch.Tensor([action]).type(torch.int32))
-                path['rewards'].append(0)
-                if verbose:
-                    print(f'{current_player} - agent1 bids: {bid}')
-            else:
-                _, bid = agent2.bid(game)
-            if bid == 'p' and (npasses < 2 or len(game['bids']) == 2):
-                npasses += 1
-            elif bid == 'p':
+    contract = None
+    violation = False
+    target_violation = False
+    try:
+        for agent1_side, game in zip(['EW', 'NS'], [game1, game2]):
+            npasses = 0
+            bidding_player = []
+            current_player = game['dealer']
+            current_index = PLAYERS.index(current_player)
+            if verbose:
+                print(f'PNN as {agent1_side} playing against oppenent')
+            it = 0
+            while True:
+                test_contract, _, test_doubled = get_info_from_game_and_bidders(game, bidding_player)
+
+                if current_player in agent1_side:
+                    state, bid = agent1.bid(game)
+                    path['states'].append(state)
+                    action = bid_to_label(bid)
+                    path['actions'].append(torch.Tensor([action]).type(torch.int32))
+                    path['rewards'].append(0)
+                    if verbose:
+                        print(f'{current_player} - agent1 bids: {bid}')
+                else:
+                    _, bid = agent2.bid(game)
+
+                violation |= (test_doubled == 1 and bid == 'd') or (test_doubled == 2 and bid in ['d', 'r'])
+                if test_contract is not None:
+                    violation |= (int(bid[:-1]) < int(test_contract[:-1]))
+                else:
+                    violation |= bid in ['d', 'r']
+                if violation:
+                    if current_player in agent1_side:
+                        target_violation = True
+                    raise BridgeRuleViolation()
+
+                if bid == 'p' and (npasses < 2 or len(game['bids']) == 2):
+                    npasses += 1
+                elif bid == 'p':
+                    game['bids'].append(bid)
+                    bidding_player.append(current_player)
+                    break
+                else:
+                    npasses = 0
                 game['bids'].append(bid)
                 bidding_player.append(current_player)
+                current_index = (1 + current_index) % 4
+                current_player = PLAYERS[current_index]
+                it += 1
+                if it > MAX_ITER:
+                    raise MaxIterException(f'MAX ITER: {json.dumps(game, indent=4)}')
+
+            contract, declarer, doubled = get_info_from_game_and_bidders(game, bidding_player)
+            if contract is None:
                 break
-            else:
-                npasses = 0
-            game['bids'].append(bid)
-            bidding_player.append(current_player)
-            current_index = (1 + current_index) % 4
-            current_player = PLAYERS[current_index]
-            it += 1
-            if it > MAX_ITER:
-                raise MaxIterException(f'MAX ITER: {json.dumps(game, indent=4)}')
+            game['contract'] = contract
+            game['doubled'] = doubled
+            game['declarer'] = declarer
 
-        contract, declarer, doubled = get_info_from_game_and_bidders(game, bidding_player)
-        if contract is None:
-            break
-        game['contract'] = contract
-        game['doubled'] = doubled
-        game['declarer'] = declarer
+            if verbose:
+                print(json.dumps(game, indent=4))
+            #trick = eval_trick_from_game(agent1_side, game)
+            trick = asyncio.run(eval_trick_from_game_async(agent1_side, game))
+            game_score = calc_score_adj(agent1_side, game['declarer'], game['contract'], trick, game['vuln'], game['doubled'], verbose)
+            game_scores.append(game_score)
+        IMP = calc_imp(sum(game_scores))
+    except BridgeRuleViolation:
+        if target_violation:
+            IMP = -100
+        else:
+            raise BridgeRuleViolation()
 
-        if verbose:
-            print(json.dumps(game, indent=4))
-        #trick = eval_trick_from_game(agent1_side, game)
-        trick = asyncio.run(eval_trick_from_game_async(agent1_side, game))
-        game_score = calc_score_adj(agent1_side, game['declarer'], game['contract'], trick, game['vuln'], game['doubled'], verbose)
-        game_scores.append(game_score)
-
-    IMP = calc_imp(sum(game_scores))
     path['rewards'][-1] = IMP
     if verbose:
         print('*' * 60 + f'  IMP = {IMP}  ' + '*' * 60)
-    if contract is None:
+    if contract is None and not target_violation:
         path = None
     return path
 
