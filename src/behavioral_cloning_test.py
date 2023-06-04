@@ -43,7 +43,7 @@ if __name__=='__main__':
     x_train, y_train, b_train = get_file_data()
     
     model_enn = ENN().to(device)
-    model_enn.load_state_dict(torch.load('model_cache/model_372_52_e5/model_enn_19.data'))
+    model_enn.load_state_dict(torch.load('../model_cache/model_372_52_e5/model_enn_19.data'))
     dataset_train = torch.utils.data.TensorDataset(x_train, b_train)
     dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size)
     model_pnn = PNN().to(device)
