@@ -124,9 +124,9 @@ class PolicyGradient:
         self.num_epochs = 8
         self.gamma = 0.99
         self.ppo_epsilon = 1e-1
-        self.enn_opt = torch.optim.SGD(self.agent_target.model_enn.parameters(), lr=1e-4)
-        self.pnn_opt = torch.optim.SGD(self.agent_target.model_pnn.parameters(), lr=1e-4)
-        self.baseline_opt = torch.optim.SGD(self.baseline_net.parameters(), lr=1e-3)
+        self.enn_opt = torch.optim.Adam(self.agent_target.model_enn.parameters(), lr=1e-5)
+        self.pnn_opt = torch.optim.Adam(self.agent_target.model_pnn.parameters(), lr=1e-4)
+        self.baseline_opt = torch.optim.Adam(self.baseline_net.parameters(), lr=1e-3)
     def generate_paths(self):
         paths = []
         for _ in tqdm(range(self.num_episodes)):
@@ -182,10 +182,6 @@ class PolicyGradient:
 
 
 if __name__ == '__main__':
-
-    test = {'players': None, 'dealer': 'W', 'hands': {'S': '6S,5S,10H,6H,KD,6D,5D,3D,2D,AC,JC,10C,6C', 'W': 'AS,10S,3S,KH,QH,JH,5H,4H,3H,JD,9D,KC,3C', 'N': 'KS,QS,7S,AH,8H,2H,QD,8D,9C,8C,7C,5C,2C', 'E': 'JS,9S,8S,4S,2S,9H,7H,AD,10D,7D,4D,QC,4C'}, 'bids': ['1H', '2C', '2H', 'p', '3H', 'd', '3S', 'p', '3N', '4H', 'p', 'p', 'd', 'p', '4S', 'p', 'p', 'd', 'd', 'p', 'p', '5C', 'd', 'd', 'd', 'd', 'd', 'p', 'd', 'd', 'd', 'p', 'p'], 'play': None, 'contract': None, 'declarer': None, 'doubled': None, 'vuln': 'both', 'made': None, 'claimed': None}
-    extract_from_incomplete_game(test)
-
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--ppo', action='store_true')
     args = parser.parse_args()
