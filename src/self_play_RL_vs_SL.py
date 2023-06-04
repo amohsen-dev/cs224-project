@@ -18,5 +18,6 @@ if __name__ == '__main__':
         imp = path['rewards'][-1]
         imps.append(imp)
 
+    print(pd.Series(imps).to_frame('IMP').expanding().std())
     print(pd.Series(imps).to_frame('IMP').expanding().mean())
 
