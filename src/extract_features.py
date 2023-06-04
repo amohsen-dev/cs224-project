@@ -9,7 +9,7 @@ import argparse
 import re
 import json
 from itertools import product
-from utils import MAX_ITER
+from utils import MAX_ITER, MaxIterException
 
 NUM_PLAYERS = 4
 DECK_SIZE = 52
@@ -119,7 +119,7 @@ def extract_from_dict(DICT):
         next_vul = vul_encoding(vul_char, player)
         it += 1
         if it > MAX_ITER:
-            raise Exception('MAX ITER')
+            raise MaxIterException('MAX ITER')
     it = 0
     while True:
         state = 0
@@ -196,11 +196,11 @@ def extract_from_dict(DICT):
 
             it2 += 1
             if it2 > MAX_ITER:
-                raise Exception('MAX ITER')
+                raise MaxIterException('MAX ITER')
 
         it += 1
         if it > MAX_ITER:
-            raise Exception('MAX ITER')
+            raise MaxIterException('MAX ITER')
     
 
 def extract_from_incomplete_game(DICT):

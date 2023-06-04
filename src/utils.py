@@ -27,6 +27,9 @@ DECK = list(CARD_INDEX.keys())
 vulns = ['both', 'NS', 'EW', 'none']
 MAX_ITER = 1000
 
+class MaxIterException(Exception):
+    pass
+
 def generate_random_hands():
     deck_tmp = DECK.copy()
     hands = {}

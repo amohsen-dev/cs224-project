@@ -10,7 +10,7 @@ from functools import partial
 from abc import abstractmethod
 from concurrent.futures import ProcessPoolExecutor
 from utils import ENN, PNN, BaselineNet, calc_score_adj, calc_imp, eval_trick_from_game, get_info_from_game_and_bidders, eval_trick_from_game_async
-from utils import generate_random_game, label_to_bid, bid_to_label, MAX_ITER
+from utils import generate_random_game, label_to_bid, bid_to_label, MAX_ITER, MaxIterException
 from extract_features import extract_from_incomplete_game
 from torch.distributions.categorical import Categorical
 
@@ -51,74 +51,70 @@ class ConsoleAgent(Agent):
         return None, bid
 
 def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
-    try:
-        game1 = generate_random_game()
-        game2 = copy.deepcopy(game1)
+    game1 = generate_random_game()
+    game2 = copy.deepcopy(game1)
 
+    if verbose:
+        print(json.dumps(game1, indent=4))
+    game_scores = []
+    path = {'states': [], 'actions': [], 'rewards': []}
+    for agent1_side, game in zip(['EW', 'NS'], [game1, game2]):
+        npasses = 0
+        bidding_player = []
+        current_player = game['dealer']
+        current_index = PLAYERS.index(current_player)
         if verbose:
-            print(json.dumps(game1, indent=4))
-        game_scores = []
-        path = {'states': [], 'actions': [], 'rewards': []}
-        for agent1_side, game in zip(['EW', 'NS'], [game1, game2]):
-            npasses = 0
-            bidding_player = []
-            current_player = game['dealer']
-            current_index = PLAYERS.index(current_player)
-            if verbose:
-                print(f'PNN as {agent1_side} playing against oppenent')
-            it = 0
-            while True:
-                if current_player in agent1_side:
-                    state, bid = agent1.bid(game)
-                    path['states'].append(state)
-                    action = bid_to_label(bid)
-                    path['actions'].append(torch.Tensor([action]).type(torch.int32))
-                    path['rewards'].append(0)
-                    if verbose:
-                        print(f'{current_player} - agent1 bids: {bid}')
-                else:
-                    _, bid = agent2.bid(game)
-                if bid == 'p' and (npasses < 2 or len(game['bids']) == 2):
-                    npasses += 1
-                elif bid == 'p':
-                    game['bids'].append(bid)
-                    bidding_player.append(current_player)
-                    break
-                else:
-                    npasses = 0
+            print(f'PNN as {agent1_side} playing against oppenent')
+        it = 0
+        while True:
+            if current_player in agent1_side:
+                state, bid = agent1.bid(game)
+                path['states'].append(state)
+                action = bid_to_label(bid)
+                path['actions'].append(torch.Tensor([action]).type(torch.int32))
+                path['rewards'].append(0)
+                if verbose:
+                    print(f'{current_player} - agent1 bids: {bid}')
+            else:
+                _, bid = agent2.bid(game)
+            if bid == 'p' and (npasses < 2 or len(game['bids']) == 2):
+                npasses += 1
+            elif bid == 'p':
                 game['bids'].append(bid)
                 bidding_player.append(current_player)
-                current_index = (1 + current_index) % 4
-                current_player = PLAYERS[current_index]
-                it += 1
-                if it > MAX_ITER:
-                    print(game['bids'])
-                    raise Exception('MAX ITER')
-
-            contract, declarer, doubled = get_info_from_game_and_bidders(game, bidding_player)
-            if contract is None:
                 break
-            game['contract'] = contract
-            game['doubled'] = doubled
-            game['declarer'] = declarer
+            else:
+                npasses = 0
+            game['bids'].append(bid)
+            bidding_player.append(current_player)
+            current_index = (1 + current_index) % 4
+            current_player = PLAYERS[current_index]
+            it += 1
+            if it > MAX_ITER:
+                print(game['bids'])
+                raise MaxIterException('MAX ITER')
 
-            if verbose:
-                print(json.dumps(game, indent=4))
-            #trick = eval_trick_from_game(agent1_side, game)
-            trick = asyncio.run(eval_trick_from_game_async(agent1_side, game))
-            game_score = calc_score_adj(agent1_side, game['declarer'], game['contract'], trick, game['vuln'], game['doubled'], verbose)
-            game_scores.append(game_score)
-
-        IMP = calc_imp(sum(game_scores))
-        path['rewards'][-1] = IMP
-        if verbose:
-            print('*' * 60 + f'  IMP = {IMP}  ' + '*' * 60)
+        contract, declarer, doubled = get_info_from_game_and_bidders(game, bidding_player)
         if contract is None:
-            path = None
-        return path
-    except Exception as exception:
-        raise(exception)
-        return None
+            break
+        game['contract'] = contract
+        game['doubled'] = doubled
+        game['declarer'] = declarer
+
+        if verbose:
+            print(json.dumps(game, indent=4))
+        #trick = eval_trick_from_game(agent1_side, game)
+        trick = asyncio.run(eval_trick_from_game_async(agent1_side, game))
+        game_score = calc_score_adj(agent1_side, game['declarer'], game['contract'], trick, game['vuln'], game['doubled'], verbose)
+        game_scores.append(game_score)
+
+    IMP = calc_imp(sum(game_scores))
+    path['rewards'][-1] = IMP
+    if verbose:
+        print('*' * 60 + f'  IMP = {IMP}  ' + '*' * 60)
+    if contract is None:
+        path = None
+    return path
 
 class PolicyGradient:
     def __init__(self):
@@ -135,10 +131,12 @@ class PolicyGradient:
     def generate_paths(self):
         paths = []
         for _ in tqdm(range(self.num_episodes)):
-        #for _ in range(self.num_episodes):
-            path = play_random_game(self.agent_target, self.agent_opponent, verbose=False)
-            if path is not None:
-                paths.append(path)
+            try:
+                path = play_random_game(self.agent_target, self.agent_opponent, verbose=False)
+                if path is not None:
+                    paths.append(path)
+            except MaxIterException:
+                continue
         return paths
 
     def update_policy(self, paths, PPO=False):
