@@ -46,8 +46,6 @@ if __name__=='__main__':
     model_enn.load_state_dict(torch.load('../model_cache/model_372_52_e5/model_enn_19.data'))
     dataset = torch.utils.data.TensorDataset(x_train, b_train)
     n_train = len(dataset) * 4 // 5
-    dataset_train, dataset_test = torch.utils.data.random_split(dataset, [n_train, len(dataset) - n_train])
-    dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size)
     model_pnn = PNN().to(device)
     optimizer = torch.optim.Adam(model_pnn.parameters(), lr=lr)
     class_weights = np.ones(38)
@@ -56,6 +54,8 @@ if __name__=='__main__':
     writer = SummaryWriter(log_dir='../model_cache/model_pnn2')
     for i_epoch in range(num_epochs):
         print(i_epoch)
+        dataset_train, dataset_test = torch.utils.data.random_split(dataset, [n_train, len(dataset) - n_train])
+        dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size)
         for x_b, b_b in tqdm(dataloader_train):
             x_b, b_b = x_b.to(device), b_b.to(device)
             enn_b = model_enn(x_b).detach()
@@ -66,7 +66,16 @@ if __name__=='__main__':
             optimizer.step()
             optimizer.zero_grad()
         print(loss)
-        df = pd.DataFrame({'pred': model_pnn(torch.cat([x_train, model_enn(x_train)], axis=1)).detach().numpy().argmax(axis=1), 'target': b_train})
+        training_data_x = dataset_train.data.tensors[0]
+        training_data_y = dataset_train.data.tensors[1]
+        training_pnn_input = torch.cat([training_data_x, model_enn(training_data_x)], axis=1)
+        test_data_x = dataset_test.data.tensors[0]
+        test_data_y = dataset_test.data.tensors[1]
+        test_pnn_input = torch.cat([test_data_x, model_enn(test_data_x)], axis=1)
+        df = pd.DataFrame({'pred': model_pnn(training_pnn_input).detach().numpy().argmax(axis=1),
+                           'target': training_data_y})
+        df_test = pd.DataFrame({'pred': model_pnn(test_pnn_input).detach().numpy().argmax(axis=1),
+                                'target': test_data_y})
         accuracy = df.query('pred==target').shape[0]/df.shape[0]
         accuracy_nonpass = df.query('(pred==target) and (pred!=0)').shape[0]/df.query('pred!=0').shape[0]
         print(f"Accuracy = {df.query('pred==target').shape[0]/df.shape[0] * 100:.2f} %")
