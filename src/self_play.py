@@ -26,12 +26,14 @@ class Agent:
 class PNNAgent(Agent):
     def __init__(self,
                  path_enn='../model_cache/model_372_52_e5/model_enn_19.data',
-                 path_pnn='../model_cache/model_pnn/model_pnn_19.data'):
+                 path_pnn='../model_cache/model_pnn/model_pnn_19.data',
+                 stochastic=True):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.model_enn = ENN().to(self.device)
         self.model_pnn = PNN().to(self.device)
         self.model_enn.load_state_dict(torch.load(path_enn))
         self.model_pnn.load_state_dict(torch.load(path_pnn))
+        self.stochastic = stochastic
 
     def bid(self, game):
         with torch.no_grad():
@@ -41,9 +43,11 @@ class PNNAgent(Agent):
             pnn_input = torch.concat([state, partner_hand_estimation])
             pnn_input.requires_grad = False
             logits = self.model_pnn(pnn_input)
-            stoch_policy = Categorical(logits=logits)
-            action = stoch_policy.sample()
-            #log_prob = stoch_policy.log_prob(action)
+            if self.stochastic:
+                stoch_policy = Categorical(logits=logits)
+                action = stoch_policy.sample()
+            else:
+                action = torch.argmax(torch.nn.Softmax()(logits))
             bid = label_to_bid(int(action))
         return state, bid
 
