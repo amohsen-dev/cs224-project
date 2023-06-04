@@ -79,7 +79,9 @@ if __name__=='__main__':
         train_accuracy_nonpass = df_test.query('(pred==target) and (pred!=0)').shape[0]/df_test.query('pred!=0').shape[0]
         test_accuracy_nonpass = df_test.query('(pred==target) and (pred!=0)').shape[0]/df_test.query('pred!=0').shape[0]
         print(f"Accuracy = {df.query('pred==target').shape[0]/df.shape[0] * 100:.2f} %")
+        print(f"Test Accuracy = {df_test.query('pred==target').shape[0]/df_test.shape[0] * 100:.2f} %")
         print(f"Accuracy (nonpass) = {df.query('(pred==target) and (pred!=0)').shape[0]/df.query('pred!=0').shape[0] * 100:.2f} %")
+        print(f"Test Accuracy (nonpass) = {df_test.query('(pred==target) and (pred!=0)').shape[0]/df_test.query('pred!=0').shape[0] * 100:.2f} %")
         torch.save(model_pnn.state_dict(), f"../model_cache/model_pnn2/model_pnn_{i_epoch}.data")
         writer.add_scalar("Loss/train", loss, i_epoch)
         writer.add_scalar("Accuracy/train", train_accuracy, i_epoch)
