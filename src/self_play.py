@@ -177,7 +177,7 @@ class PolicyGradient:
                 this_old_log_probs.append(dist.log_prob(action).detach())
             old_log_probs.append(this_old_log_probs)
 
-        losses = []
+        losses, losses_bl = [], []
         for epoch in range(self.num_epochs):
             self.enn_opt.zero_grad()
             self.pnn_opt.zero_grad()
@@ -216,7 +216,9 @@ class PolicyGradient:
                 loss_bl.backward()
                 self.baseline_opt.step()
             losses.append(loss.detach().numpy()[0])
-        print(losses)
+            losses_bl.append(loss_bl.detach().numpy()[0])
+        print('PNN Losses: ', losses)
+        print('Baseline Losses: ', losses_bl)
         imp = np.mean([p['rewards'][-1] for p in paths])
         return imp
 
