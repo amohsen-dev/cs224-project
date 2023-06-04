@@ -92,7 +92,7 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
                 if violation:
                     if current_player in agent1_side:
                         target_violation = True
-                    print(bid, ' after ', game['bids'])
+                    print(bid, ' after ', game['bids'], f' Target vioation: {target_violation}')
                     raise BridgeRuleViolation()
 
                 if bid == 'p' and (npasses < 2 or len(game['bids']) == 2):
