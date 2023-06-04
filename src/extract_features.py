@@ -191,8 +191,9 @@ def extract_from_incomplete_game(DICT):
     DICT_with_termination = DICT.copy()
     DICT_with_termination['bids'] = DICT_with_termination['bids'] + ['p'] * 4
     idx = len(DICT['bids'])
-    return extract_from_dict(DICT_with_termination)[idx]
-
+    extracted = extract_from_dict(DICT_with_termination)
+    idx = min(idx, len(extracted) - 1)
+    return extracted[idx]
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Extract features')
