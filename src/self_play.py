@@ -230,7 +230,7 @@ if __name__ == '__main__':
     algorithm = PolicyGradient()
     opponent_pool = [algorithm.agent_opponent]
     imps, losses = [], []
-    ff = 'PPO' if args.ppo else 'PG'
+    ff = 'PPO' if args.ppo else ('AQ' if args.baseline else 'PG')
     writer = SummaryWriter(log_dir=f'../model_cache/RL/{ff}')
     for i in range(1000):
         if i % 4 == 0:
