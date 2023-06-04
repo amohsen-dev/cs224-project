@@ -9,6 +9,7 @@ import argparse
 import re
 import json
 from itertools import product
+from utils import MAX_ITER
 
 NUM_PLAYERS = 4
 DECK_SIZE = 52
@@ -95,6 +96,7 @@ def extract_from_dict(DICT):
     partner_hand = hands[(player + 2)%NUM_PLAYERS,:]
     next_vul = vul_encoding(vul_char, player)
     num_initial_passes = 0
+    it = 0
     while state != -1:
         bid_sequence[num_initial_passes] = 1
         num_initial_passes = num_initial_passes + 1
@@ -115,6 +117,10 @@ def extract_from_dict(DICT):
         next_hand = hands[player,:]
         partner_hand = hands[(player + 2)%NUM_PLAYERS,:]
         next_vul = vul_encoding(vul_char, player)
+        it += 1
+        if it > MAX_ITER:
+            raise Exception('MAX ITER')
+    it = 0
     while True:
         state = 0
         bid_sequence[bid_index] = 1
@@ -142,6 +148,8 @@ def extract_from_dict(DICT):
         num_passes_3 = 0
         num_doubles = 0
         num_redoubles = 0
+
+        it2 = 0
         while state != -1:
             if bid[0] == 'd':
                 bid_sequence[bid_index + 3] = 1
@@ -185,6 +193,14 @@ def extract_from_dict(DICT):
             next_hand = hands[player,:]
             partner_hand = hands[(player + 2)%NUM_PLAYERS,:]
             next_vul = vul_encoding(vul_char, player)
+
+            it2 += 1
+            if it2 > MAX_ITER:
+                raise Exception('MAX ITER')
+
+        it += 1
+        if it > MAX_ITER:
+            raise Exception('MAX ITER')
     
 
 def extract_from_incomplete_game(DICT):

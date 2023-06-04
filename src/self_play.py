@@ -10,7 +10,7 @@ from functools import partial
 from abc import abstractmethod
 from concurrent.futures import ProcessPoolExecutor
 from utils import ENN, PNN, BaselineNet, calc_score_adj, calc_imp, eval_trick_from_game, get_info_from_game_and_bidders, eval_trick_from_game_async
-from utils import generate_random_game, label_to_bid, bid_to_label
+from utils import generate_random_game, label_to_bid, bid_to_label, MAX_ITER
 from extract_features import extract_from_incomplete_game
 from torch.distributions.categorical import Categorical
 
@@ -66,6 +66,7 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
             current_index = PLAYERS.index(current_player)
             if verbose:
                 print(f'PNN as {agent1_side} playing against oppenent')
+            it = 0
             while True:
                 if current_player in agent1_side:
                     state, bid = agent1.bid(game)
@@ -89,6 +90,9 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
                 bidding_player.append(current_player)
                 current_index = (1 + current_index) % 4
                 current_player = PLAYERS[current_index]
+                it += 1
+                if it > MAX_ITER:
+                    raise Exception('MAX ITER')
 
             contract, declarer, doubled = get_info_from_game_and_bidders(game, bidding_player)
             if contract is None:

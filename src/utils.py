@@ -25,6 +25,7 @@ CARD_INDEX = { c + s: CARDNO_INDEX[c] + NUM_CARDS * SUIT_INDEX[s]  for s, c in p
 DECK = list(CARD_INDEX.keys())
 
 vulns = ['both', 'NS', 'EW', 'none']
+MAX_ITER = 1000
 
 def generate_random_hands():
     deck_tmp = DECK.copy()
