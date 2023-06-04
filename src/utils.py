@@ -137,7 +137,7 @@ def get_info_from_game_and_bidders(game, bidding_players):
     #    trick = 13 - trick
     return trick"""
 
-async def eval_trick_from_game_async(declarer, game):
+async def eval_trick_from_game_async(game, verbose=False):
     clin = json_to_lin_cards(game)
     cmd = f'../solver/bcalconsole -e e -q -t a -d lin -c {clin}'
     proc = await asyncio.create_subprocess_shell(
@@ -147,7 +147,8 @@ async def eval_trick_from_game_async(declarer, game):
     )
 
     stdout, stderr = await proc.communicate()
-    print(stdout.decode())
+    if verbose:
+        print(stdout.decode())
     ev = [e.split() for e in stdout.decode().split('\n')][:-1]
     ev = pd.DataFrame(ev, columns=['leader', 'C', 'D', 'H', 'S', 'N']).set_index('leader').astype(np.int32)
     #print(ev)
