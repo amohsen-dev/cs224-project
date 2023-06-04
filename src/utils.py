@@ -124,8 +124,7 @@ def get_info_from_game_and_bidders(game, bidding_players):
                 declarer = bidder
                 break
     return contract, declarer, doubled
-
-"""def eval_trick_from_game(players, game):
+def eval_trick_from_game(players, game):
     clin = json_to_lin_cards(game)
     ev = os.popen(f'../solver/bcalconsole -e e -q -t a -d lin -c {clin}').read()
     print(ev)
@@ -136,7 +135,7 @@ def get_info_from_game_and_bidders(game, bidding_players):
     trick = ev.loc[game['declarer'], game['contract'][-1]]
     if players == 'EW':
         trick = 13 - trick
-    return trick"""
+    return trick
 
 async def eval_trick_from_game_async(declarer, game):
     clin = json_to_lin_cards(game)
@@ -151,11 +150,11 @@ async def eval_trick_from_game_async(declarer, game):
     print(stdout.decode())
     ev = [e.split() for e in stdout.decode().split('\n')][:-1]
     ev = pd.DataFrame(ev, columns=['leader', 'C', 'D', 'H', 'S', 'N']).set_index('leader').astype(np.int32)
-    #print(ev)
-    #ev.index = ev.index.map({'N': 'W', 'E': 'N', 'S': 'E', 'W': 'S'})
+    print(ev)
+    ev.index = ev.index.map({'N': 'W', 'E': 'N', 'S': 'E', 'W': 'S'})
     trick = ev.loc[game['declarer'], game['contract'][-1]]
-    #if declarer in 'EW':
-    #    trick = 13 - trick
+    if declarer in 'EW':
+        trick = 13 - trick
     return trick
 
 def calc_score_adj(pos, declarer, contract, trick, vuln, doubled, verbose=False):
