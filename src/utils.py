@@ -135,7 +135,7 @@ def eval_trick_from_game(players, game):
         trick = 13 - trick
     return trick
 
-async def eval_trick_from_game_async(players, game):
+async def eval_trick_from_game_async(declarer, game):
     clin = json_to_lin_cards(game)
     cmd = f'../solver/bcalconsole -e e -q -t a -d lin -c {clin}'
     proc = await asyncio.create_subprocess_shell(
@@ -148,16 +148,16 @@ async def eval_trick_from_game_async(players, game):
     print(stdout)
     ev = [e.split() for e in stdout.decode().split('\n')][:-1]
     ev = pd.DataFrame(ev, columns=['leader', 'C', 'D', 'H', 'S', 'N']).set_index('leader').astype(np.int32)
-    ev.index = ev.index.map({'N': 'E', 'E': 'S', 'S': 'W', 'W': 'N'})
+    ev.index = ev.index.map({'N': 'W', 'E': 'N', 'S': 'E', 'W': 'S'})
     trick = ev.loc[game['declarer'], game['contract'][-1]]
-    if players in 'EW' or players == 'EW':
+    if declarer in 'EW':
         trick = 13 - trick
     return trick
 
 def calc_score_adj(pos, declarer, contract, trick, vuln, doubled, verbose=False):
-    if doubled == 'r':
+    if doubled == 2:
         doubled, redoubled = 0, 1
-    elif doubled == 'd':
+    elif doubled == 1:
         doubled, redoubled = 1, 0
     else:
         doubled, redoubled = 0, 0
@@ -173,7 +173,7 @@ def calc_score_adj(pos, declarer, contract, trick, vuln, doubled, verbose=False)
     score = calc_score(level, suit, trick, vul, doubled, redoubled)
     if verbose:
         print(f'received score {score}')
-    if ((pos in 'EW') and (declarer in 'NS')) or ((pos in 'NS') or (declarer in 'EW')):
+    if ((pos in 'EW') and (declarer in 'NS')) or ((pos in 'NS') and (declarer in 'EW')):
         score = -score
     if verbose:
         print(f'score adjusted to {score}')
