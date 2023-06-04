@@ -27,6 +27,6 @@ if __name__ == '__main__':
         comparison = comparison.append({
             'nGames': i, 'dIMP': np.mean(imps), 'nSample': len(imps), 'stdIMP': np.std(imps)
         }, ignore_index=True)
-        comparison.to_pickle('SL_vs_RL_comparison.pkl')
+        comparison.to_pickle('SL_vs_PPO_comparison.pkl')
         print(comparison)
 
