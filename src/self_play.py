@@ -92,6 +92,7 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
                 if violation:
                     if current_player in agent1_side:
                         target_violation = True
+                    print(bid, ' after ', game['bids'])
                     raise BridgeRuleViolation()
 
                 if bid == 'p' and (npasses < 2 or len(game['bids']) == 2):
@@ -142,7 +143,7 @@ class PolicyGradient:
         self.agent_target = PNNAgent()
         self.agent_opponent = PNNAgent()
         self.baseline_net = BaselineNet()
-        self.num_episodes = 8
+        self.num_episodes = 16
         self.num_epochs = 8
         self.gamma = 0.99
         self.ppo_epsilon = 1e-1
