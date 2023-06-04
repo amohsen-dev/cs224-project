@@ -180,7 +180,6 @@ class BaselineNet(torch.nn.Module):
             torch.nn.ReLU(),
             torch.nn.Linear(64, 1)
         )
-
     def forward(self, x_b):
         return self.layers(x_b)
 
