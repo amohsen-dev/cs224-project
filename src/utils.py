@@ -209,6 +209,33 @@ class PNN(torch.nn.Module):
     def forward(self, x_b):
         return self.layers(x_b)
 
+class PNN2(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.layer1 = torch.nn.Linear(424, 200)
+        self.relu1 = torch.nn.ReLU()
+        self.dropout1 = torch.nn.Dropout(p=.5)
+        self.layer2 = torch.nn.Linear(200, 50)
+        self.relu2 = torch.nn.ReLU()
+        self.dropout2 = torch.nn.Dropout(p=.5)
+        self.layer3 = torch.nn.Linear(50, 38)
+    def forward(self, x_b):
+        out = self.layer1(x_b)
+        out = self.relu1(out)
+        out = self.dropout1(out)
+        out = self.layer2(out)
+        out = self.relu2(out)
+        out = self.dropout2(out)
+        out = self.layer3(out)
+        return out
+
+    def forward_no_dropout(self, x_b):
+        out = self.layer1(x_b)
+        out = self.relu1(out)
+        out = self.layer2(out)
+        out = self.relu2(out)
+        out = self.layer3(out)
+        return out
 
 def calc_imp(x):
     return calc_IMP(x)
