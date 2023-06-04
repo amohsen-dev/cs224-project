@@ -87,7 +87,7 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
                 violation |= (test_doubled == 1 and bid == 'd') or (test_doubled == 2 and bid in ['d', 'r'])
                 if test_contract is not None and bid not in ['p', 'd', 'r']:
                     violation |= (int(bid[:-1]) < int(test_contract[:-1]))
-                else:
+                elif test_contract is None:
                     violation |= bid in ['d', 'r']
                 if violation:
                     if current_player in agent1_side:
