@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     imps = []
     for i in tqdm(range(64)):
-        path = play_random_game(agent1, agent2, verbose=True)
+        path = play_random_game(agent1, agent2, verbose=False)
         imp = path['rewards'][-1]
         imps.append(imp)
 
