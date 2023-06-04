@@ -166,7 +166,7 @@ class PolicyGradient:
                 continue
         return paths
 
-    def update_policy(self, paths, PPO=False):
+    def update_policy(self, paths, PPO=False, Baseline=False):
         old_log_probs = []
         for path in paths:
             this_old_log_probs = []
@@ -181,11 +181,24 @@ class PolicyGradient:
         for epoch in range(self.num_epochs):
             self.enn_opt.zero_grad()
             self.pnn_opt.zero_grad()
+            self.baseline_opt.zero_grad()
             loss = torch.Tensor([0]).type(torch.float32)
-            N = 0
+            loss_bl = torch.Tensor([0]).type(torch.float32)
+            N, N_bl = 0, 0
             for path, old_log_probss in zip(paths, old_log_probs):
                 path_len = len(path['rewards'])
                 returns = np.power(self.gamma, np.arange(path_len)[::-1]) * path['rewards'][-1]
+                if Baseline:
+                    preds = []
+                    for ret, state in zip(returns, path['states']):
+                        pred = self.baseline_net(state)
+                        preds.append(pred.detach())
+                        loss_bl += (pred - ret) ** 2
+                        N_bl += 1
+                    loss_bl = loss_bl / N_bl
+                    loss_bl.backward()
+                    self.baseline_opt.step()
+                    returns = [r - p for r, p in zip(returns, preds)]
                 for state, action, A, old_log_prob in zip(path['states'], path['actions'], returns, old_log_probss):
                     enn = self.agent_target.model_enn(state)
                     logits = self.agent_target.model_pnn(torch.cat([state, enn]))
@@ -211,6 +224,7 @@ class PolicyGradient:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--ppo', action='store_true')
+    parser.add_argument('-b', '--baseline', action='store_true')
     args = parser.parse_args()
 
     algorithm = PolicyGradient()
@@ -228,7 +242,7 @@ if __name__ == '__main__':
             torch.save(algorithm.agent_target.model_pnn.state_dict(), f"../model_cache/RL/{ff}/model_pnn_{i*algorithm.num_episodes}.data")
         paths = algorithm.generate_paths()
         if len(paths) > 0:
-            imp = algorithm.update_policy(paths, PPO=args.ppo)
+            imp = algorithm.update_policy(paths, PPO=args.ppo, Baseline=args.baseline)
             imps.append(imp)
             writer.add_scalar("Loss/train", imp, i)
         print('IMP MEAN:')
