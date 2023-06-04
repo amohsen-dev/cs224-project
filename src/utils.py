@@ -129,6 +129,7 @@ def eval_trick_from_game(players, game):
     ev = os.popen(f'../solver/bcalconsole -e e -q -t a -d lin -c {clin}').read()
     ev = [e.split() for e in ev.split('\n')][:-1]
     ev = pd.DataFrame(ev, columns=['leader', 'C', 'D', 'H', 'S', 'N']).set_index('leader').astype(np.int32)
+    print(ev)
     ev.index = ev.index.map({'N': 'E', 'E': 'S', 'S': 'W', 'W': 'N'})
     trick = ev.loc[game['declarer'], game['contract'][-1]]
     if players == 'EW':
