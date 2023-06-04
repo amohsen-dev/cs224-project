@@ -82,7 +82,7 @@ def extract_from_dict(DICT):
     bid_id = 0
     bid = bid_list[bid_id]
     if bid in ['d', 'r']:
-        raise BridgeRuleViolation()
+        raise BridgeRuleViolation(json.dumps(DICT, indent=4))
 
     state = 0
     if bid == 'p':
@@ -122,7 +122,7 @@ def extract_from_dict(DICT):
         next_vul = vul_encoding(vul_char, player)
         it += 1
         if it > MAX_ITER:
-            raise MaxIterException('MAX ITER')
+            raise MaxIterException(f'MAX ITER: {json.dumps(DICT, indent=44)}')
     it = 0
     while True:
         state = 0
@@ -204,11 +204,11 @@ def extract_from_dict(DICT):
 
             it2 += 1
             if it2 > MAX_ITER:
-                raise MaxIterException('MAX ITER')
+                raise MaxIterException(f'MAX ITER: {json.dumps(DICT, indent=44)}')
 
         it += 1
         if it > MAX_ITER:
-            raise MaxIterException('MAX ITER')
+            raise MaxIterException(f'MAX ITER: {json.dumps(DICT, indent=44)}')
     
 
 def extract_from_incomplete_game(DICT):

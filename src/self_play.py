@@ -134,7 +134,8 @@ class PolicyGradient:
                 path = play_random_game(self.agent_target, self.agent_opponent, verbose=False)
                 if path is not None:
                     paths.append(path)
-            except (MaxIterException, BridgeRuleViolation):
+            except (MaxIterException, BridgeRuleViolation) as exception:
+                print(exception)
                 continue
         return paths
 
