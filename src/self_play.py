@@ -14,6 +14,7 @@ from utils import ENN, PNN, BaselineNet, calc_score_adj, calc_imp, eval_trick_fr
 from utils import generate_random_game, label_to_bid, bid_to_label, MAX_ITER, MaxIterException, BridgeRuleViolation
 from extract_features import extract_from_incomplete_game
 from torch.distributions.categorical import Categorical
+from torch.utils.tensorboard import SummaryWriter
 
 PLAYERS = ['S', 'W', 'N', 'E']
 
@@ -213,14 +214,21 @@ if __name__ == '__main__':
     algorithm = PolicyGradient()
     opponent_pool = [algorithm.agent_opponent]
     imps, losses = [], []
+    ff = 'PPO' if args.ppo else 'PG'
+    writer = SummaryWriter(log_dir=f'../model_cache/RL/{ff}')
     for i in range(1000):
         if i % 4 == 0:
             opponent_pool.append(copy.deepcopy(algorithm.agent_target))
             algorithm.agent_opponent = opponent_pool[np.random.choice(len(opponent_pool))]
+        if i % 16 == 0:
+
+            torch.save(algorithm.agent_target.model_enn.state_dict(), f"../model_cache/RL/{ff}/model_enn_{i*algorithm.num_episodes}.data")
+            torch.save(algorithm.agent_target.model_pnn.state_dict(), f"../model_cache/RL/{ff}/model_pnn_{i*algorithm.num_episodes}.data")
         paths = algorithm.generate_paths()
         if len(paths) > 0:
             imp = algorithm.update_policy(paths, PPO=args.ppo)
             imps.append(imp)
+            writer.add_scalar("Loss/train", imp, i)
         print('IMP MEAN:')
         print(pd.Series(imps).ewm(5).mean())
 
