@@ -163,7 +163,7 @@ def calc_score_adj(pos, declarer, contract, trick, vuln, doubled, verbose=False)
         doubled, redoubled = 0, 0
 
     vul = 0
-    if vuln == 'both' or (pos in vuln):
+    if vuln == 'both' or (declarer in vuln):
         vul = 1
 
     level, suit = int(contract[:-1]), SUIT_INDEX[contract[-1]]
