@@ -145,11 +145,12 @@ async def eval_trick_from_game_async(players, game):
     )
 
     stdout, stderr = await proc.communicate()
+    print(stdout)
     ev = [e.split() for e in stdout.decode().split('\n')][:-1]
     ev = pd.DataFrame(ev, columns=['leader', 'C', 'D', 'H', 'S', 'N']).set_index('leader').astype(np.int32)
     ev.index = ev.index.map({'N': 'E', 'E': 'S', 'S': 'W', 'W': 'N'})
     trick = ev.loc[game['declarer'], game['contract'][-1]]
-    if players == 'EW':
+    if players in 'EW' or players == 'EW':
         trick = 13 - trick
     return trick
 
@@ -172,8 +173,6 @@ def calc_score_adj(pos, declarer, contract, trick, vuln, doubled, verbose=False)
     score = calc_score(level, suit, trick, vul, doubled, redoubled)
     if verbose:
         print(f'received score {score}')
-    if declarer in 'EW':
-        score = -score
     if ((pos in 'EW') and (declarer in 'NS')) or ((pos in 'NS') or (declarer in 'EW')):
         score = -score
     if verbose:

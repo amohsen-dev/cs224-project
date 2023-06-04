@@ -123,7 +123,7 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
             if verbose:
                 print(json.dumps(game, indent=4))
             #trick = eval_trick_from_game(agent1_side, game)
-            trick = asyncio.run(eval_trick_from_game_async(agent1_side, game))
+            trick = asyncio.run(eval_trick_from_game_async(declarer, game))
             game_score = calc_score_adj(agent1_side, game['declarer'], game['contract'], trick, game['vuln'], game['doubled'], verbose)
             game_scores.append(game_score)
         IMP = calc_imp(sum(game_scores))
