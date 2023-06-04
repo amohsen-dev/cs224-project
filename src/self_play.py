@@ -24,12 +24,14 @@ class Agent:
         NotImplementedError()
 
 class PNNAgent(Agent):
-    def __init__(self):
+    def __init__(self,
+                 path_enn='../model_cache/model_372_52_e5/model_enn_19.data',
+                 path_pnn='../model_cache/model_pnn/model_pnn_19.data'):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.model_enn = ENN().to(self.device)
         self.model_pnn = PNN().to(self.device)
-        self.model_enn.load_state_dict(torch.load('../model_cache/model_372_52_e5/model_enn_19.data'))
-        self.model_pnn.load_state_dict(torch.load('../model_cache/model_pnn/model_pnn_19.data'))
+        self.model_enn.load_state_dict(torch.load(path_enn))
+        self.model_pnn.load_state_dict(torch.load(path_pnn))
 
     def bid(self, game):
         with torch.no_grad():
