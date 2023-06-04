@@ -47,7 +47,7 @@ class PNNAgent(Agent):
                 stoch_policy = Categorical(logits=logits)
                 action = stoch_policy.sample()
             else:
-                action = torch.argmax(torch.nn.Softmax(dim=1)(logits))
+                action = torch.argmax(torch.nn.Softmax(dim=0)(logits))
             bid = label_to_bid(int(action))
         return state, bid
 
