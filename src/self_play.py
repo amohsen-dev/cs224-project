@@ -85,7 +85,7 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
                     _, bid = agent2.bid(game)
 
                 violation |= (test_doubled == 1 and bid == 'd') or (test_doubled == 2 and bid in ['d', 'r'])
-                if test_contract is not None:
+                if test_contract is not None and bid not in ['p', 'd', 'r']:
                     violation |= (int(bid[:-1]) < int(test_contract[:-1]))
                 else:
                     violation |= bid in ['d', 'r']
