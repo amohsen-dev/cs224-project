@@ -91,7 +91,6 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
             current_player = PLAYERS[current_index]
             it += 1
             if it > MAX_ITER:
-                print(game['bids'])
                 raise MaxIterException('MAX ITER')
 
         contract, declarer, doubled = get_info_from_game_and_bidders(game, bidding_player)
