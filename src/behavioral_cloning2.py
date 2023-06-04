@@ -47,7 +47,7 @@ if __name__=='__main__':
     dataset = torch.utils.data.TensorDataset(x_train, b_train)
     n_train = len(dataset) * 4 // 5
     model_pnn = PNN2().to(device)
-    optimizer = torch.optim.Adam(model_pnn.parameters(), lr=lr)
+    optimizer = torch.optim.SGD(model_pnn.parameters(), lr=lr)
     class_weights = np.ones(38)
     class_weights[0] = .05
     class_weights = torch.from_numpy(class_weights).type(torch.float32)
