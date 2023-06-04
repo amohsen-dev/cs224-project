@@ -196,9 +196,6 @@ class PolicyGradient:
                         preds.append(pred.detach())
                         loss_bl += (pred - ret) ** 2
                         N_bl += 1
-                    loss_bl = loss_bl / N_bl
-                    loss_bl.backward()
-                    self.baseline_opt.step()
                     returns = [r - p for r, p in zip(returns, preds)]
                 for state, action, A, old_log_prob in zip(path['states'], path['actions'], returns, old_log_probss):
                     enn = self.agent_target.model_enn(state)
@@ -216,6 +213,9 @@ class PolicyGradient:
             loss.backward()
             self.enn_opt.step()
             self.pnn_opt.step()
+            if Baseline:
+                loss_bl.backward()
+                self.baseline_opt.step()
             losses.append(loss.detach().numpy()[0])
         print(losses)
         imp = np.mean([p['rewards'][-1] for p in paths])
