@@ -191,10 +191,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     algorithm = PolicyGradient()
+    opponent_pool = [algorithm.agent_opponent]
     imps, losses = [], []
     for i in range(1000):
         if i % 4 == 0:
-            algorithm.agent_opponent = copy.deepcopy(algorithm.agent_target)
+            opponent_pool.append(copy.deepcopy(algorithm.agent_target))
+            algorithm.agent_opponent = opponent_pool[np.random.choice(len(opponent_pool))]
         paths = algorithm.generate_paths()
         if len(paths) > 0:
             imp = algorithm.update_policy(paths, PPO=args.ppo)
