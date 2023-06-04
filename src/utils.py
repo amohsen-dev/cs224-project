@@ -30,6 +30,9 @@ MAX_ITER = 1000
 class MaxIterException(Exception):
     pass
 
+class BridgeRuleViolation(Exception):
+    pass
+
 def generate_random_hands():
     deck_tmp = DECK.copy()
     hands = {}

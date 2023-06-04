@@ -9,7 +9,7 @@ import argparse
 import re
 import json
 from itertools import product
-from utils import MAX_ITER, MaxIterException
+from utils import MAX_ITER, MaxIterException, BridgeRuleViolation
 
 NUM_PLAYERS = 4
 DECK_SIZE = 52
@@ -81,6 +81,9 @@ def extract_from_dict(DICT):
     bid_list = DICT['bids']
     bid_id = 0
     bid = bid_list[bid_id]
+    if bid in ['d', 'r']:
+        raise BridgeRuleViolation()
+
     state = 0
     if bid == 'p':
         next_bid = 0

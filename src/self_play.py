@@ -10,7 +10,7 @@ from functools import partial
 from abc import abstractmethod
 from concurrent.futures import ProcessPoolExecutor
 from utils import ENN, PNN, BaselineNet, calc_score_adj, calc_imp, eval_trick_from_game, get_info_from_game_and_bidders, eval_trick_from_game_async
-from utils import generate_random_game, label_to_bid, bid_to_label, MAX_ITER, MaxIterException
+from utils import generate_random_game, label_to_bid, bid_to_label, MAX_ITER, MaxIterException, BridgeRuleViolation
 from extract_features import extract_from_incomplete_game
 from torch.distributions.categorical import Categorical
 
@@ -134,7 +134,7 @@ class PolicyGradient:
                 path = play_random_game(self.agent_target, self.agent_opponent, verbose=False)
                 if path is not None:
                     paths.append(path)
-            except MaxIterException:
+            except (MaxIterException, BridgeRuleViolation):
                 continue
         return paths
 
