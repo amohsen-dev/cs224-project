@@ -154,29 +154,34 @@ def extract_from_dict(DICT):
 
         it2 = 0
         while state != -1:
-            if bid[0] == 'd':
-                bid_sequence[bid_index + 3] = 1
-                num_doubles = 1
-            elif bid[0] == 'r':
-                bid_sequence[bid_index + 6] = 1
-                num_redoubles = 1
-            else:
-                if num_doubles == 0:
-                    bid_sequence[bid_index + num_passes_1 + 1] = 1
-                    num_passes_1 = num_passes_1 + 1
-                    if num_passes_1 == 3:
-                        return data
+            try:
+                if bid[0] == 'd':
+                    bid_sequence[bid_index + 3] = 1
+                    num_doubles = 1
+                elif bid[0] == 'r':
+                    bid_sequence[bid_index + 6] = 1
+                    num_redoubles = 1
                 else:
-                    if num_redoubles == 0:
-                        bid_sequence[bid_index + num_passes_2 + 4] = 1
-                        num_passes_2 = num_passes_2 + 1
-                        if num_passes_2 == 3:
+                    if num_doubles == 0:
+                        bid_sequence[bid_index + num_passes_1 + 1] = 1
+                        num_passes_1 = num_passes_1 + 1
+                        if num_passes_1 == 3:
                             return data
                     else:
-                        bid_sequence[bid_index + num_passes_3 + 7] = 1
-                        num_passes_3 = num_passes_3 + 1
-                        if num_passes_3 == 3:
-                            return data
+                        if num_redoubles == 0:
+                            bid_sequence[bid_index + num_passes_2 + 4] = 1
+                            num_passes_2 = num_passes_2 + 1
+                            if num_passes_2 == 3:
+                                return data
+                        else:
+                            bid_sequence[bid_index + num_passes_3 + 7] = 1
+                            num_passes_3 = num_passes_3 + 1
+                            if num_passes_3 == 3:
+                                return data
+            except Exception as exception:
+                print(exception)
+                print(DICT)
+                raise Exception(exception)
             bid_id += 1
             bid = bid_list[bid_id]
             if bid[0] == 'p':
