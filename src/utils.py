@@ -127,6 +127,7 @@ def get_info_from_game_and_bidders(game, bidding_players):
 def eval_trick_from_game(players, game):
     clin = json_to_lin_cards(game)
     ev = os.popen(f'../solver/bcalconsole -e e -q -t a -d lin -c {clin}').read()
+    print(ev)
     ev = [e.split() for e in ev.split('\n')][:-1]
     ev = pd.DataFrame(ev, columns=['leader', 'C', 'D', 'H', 'S', 'N']).set_index('leader').astype(np.int32)
     print(ev)
@@ -146,6 +147,7 @@ async def eval_trick_from_game_async(declarer, game):
     )
 
     stdout, stderr = await proc.communicate()
+    print(stdout.decode())
     ev = [e.split() for e in stdout.decode().split('\n')][:-1]
     ev = pd.DataFrame(ev, columns=['leader', 'C', 'D', 'H', 'S', 'N']).set_index('leader').astype(np.int32)
     print(ev)
