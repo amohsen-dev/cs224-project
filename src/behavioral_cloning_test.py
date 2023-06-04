@@ -44,14 +44,16 @@ if __name__=='__main__':
     
     model_enn = ENN().to(device)
     model_enn.load_state_dict(torch.load('../model_cache/model_372_52_e5/model_enn_19.data'))
-    dataset_train = torch.utils.data.TensorDataset(x_train, b_train)
+    dataset = torch.utils.data.TensorDataset(x_train, b_train)
+    n_train = len(dataset) * 4 // 5
+    dataset_train, dataset_test = torch.utils.data.random_split(dataset, [n_train, len(dataset) - n_train])
     dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size)
     model_pnn = PNN().to(device)
     optimizer = torch.optim.Adam(model_pnn.parameters(), lr=lr)
     class_weights = np.ones(38)
     class_weights[0] = .1
     class_weights = torch.from_numpy(class_weights).type(torch.float32)
-    writer = SummaryWriter(log_dir='.')
+    writer = SummaryWriter(log_dir='../model_cache/model_pnn2')
     for i_epoch in range(num_epochs):
         print(i_epoch)
         for x_b, b_b in tqdm(dataloader_train):
@@ -69,7 +71,7 @@ if __name__=='__main__':
         accuracy_nonpass = df.query('(pred==target) and (pred!=0)').shape[0]/df.query('pred!=0').shape[0]
         print(f"Accuracy = {df.query('pred==target').shape[0]/df.shape[0] * 100:.2f} %")
         print(f"Accuracy (nonpass) = {df.query('(pred==target) and (pred!=0)').shape[0]/df.query('pred!=0').shape[0] * 100:.2f} %")
-        torch.save(model_pnn.state_dict(), f"model_pnn_{i_epoch}.data")
+        torch.save(model_pnn.state_dict(), f"../model_cache/model_pnn2/model_pnn_{i_epoch}.data")
         writer.add_scalar("Loss/train", loss, i_epoch)
         writer.add_scalar("Accuracy/train", accuracy, i_epoch)
         writer.add_scalar("Accuracy_nonpass/train", accuracy_nonpass, i_epoch)
