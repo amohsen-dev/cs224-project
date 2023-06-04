@@ -21,7 +21,7 @@ def get_dummy_data():
 
 
 def get_file_data():
-    ddd = pd.read_pickle('INTDATA.pkl').values
+    ddd = pd.read_pickle('../INTDATA.pkl').values
     x_train = ddd[:, :372]
     y_train = ddd[:, -52:]
     b_train = ddd[:, 372]
