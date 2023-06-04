@@ -147,7 +147,7 @@ class PolicyGradient:
         self.agent_target = PNNAgent()
         self.agent_opponent = PNNAgent()
         self.baseline_net = BaselineNet()
-        self.num_episodes = 16
+        self.num_episodes = 32
         self.num_epochs = 8
         self.gamma = 0.99
         self.ppo_epsilon = 1e-1
