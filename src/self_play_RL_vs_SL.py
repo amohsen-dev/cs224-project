@@ -4,7 +4,7 @@ from tqdm import tqdm
 from self_play import ConsoleAgent, PNNAgent, play_random_game
 
 if __name__ == '__main__':
-    comparison = pd.DataFrame(columns=['dIMP'])
+    comparison = pd.DataFrame(columns=['dIMP', 'nGames', 'stdIMP'])
     for i in tqdm(range(0, 31744, 512)):
 
         agent1 = PNNAgent(
@@ -18,10 +18,13 @@ if __name__ == '__main__':
 
         imps = []
         for i in range(128):
-            path = play_random_game(agent1, agent2, verbose=False)
-            imp = path['rewards'][-1]
-            imps.append(imp)
-        comparison.loc[i] = np.mean(imps)
+            try:
+                path = play_random_game(agent1, agent2, verbose=False)
+                imp = path['rewards'][-1]
+                imps.append(imp)
+            except Exception:
+                pass
+        comparison.loc[i] = (np.mean(imps), len(imps), np.std(imps))
         comparison.to_pickle('SL_vs_RL_comparison.pkl')
         print(comparison)
 
