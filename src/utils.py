@@ -109,7 +109,7 @@ def get_info_from_game_and_bidders(game, bidding_players):
         print('GAME ABORTED ALL PASS')
         return None, None, None
     for bid, bidder in zip(game['bids'][::-1], bidding_players[::-1]):
-        if bid == 'd':
+        if bid == 'd' and doubled == 0:
             doubled = 1
         if bid == 'r':
             doubled = 2
