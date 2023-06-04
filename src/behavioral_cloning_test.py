@@ -66,11 +66,11 @@ if __name__=='__main__':
             optimizer.step()
             optimizer.zero_grad()
         print(loss)
-        training_data_x = dataset_train.data.tensors[0]
-        training_data_y = dataset_train.data.tensors[1]
+        training_data_x = dataset_train.dataset.tensors[0]
+        training_data_y = dataset_train.dataset.tensors[1]
         training_pnn_input = torch.cat([training_data_x, model_enn(training_data_x)], axis=1)
-        test_data_x = dataset_test.data.tensors[0]
-        test_data_y = dataset_test.data.tensors[1]
+        test_data_x = dataset_test.dataset.tensors[0]
+        test_data_y = dataset_test.dataset.tensors[1]
         test_pnn_input = torch.cat([test_data_x, model_enn(test_data_x)], axis=1)
         df = pd.DataFrame({'pred': model_pnn(training_pnn_input).detach().numpy().argmax(axis=1),
                            'target': training_data_y})
