@@ -192,7 +192,7 @@ class PolicyGradient:
 
                     enn = self.agent_target.model_enn(state)
                     if Baseline:
-                        v = self.baseline_net(torch.cat([state, enn]))
+                        v = self.baseline_net(torch.cat([state, enn.detach()]))
                         loss_bl += (v - ret) ** 2
                         A = ret - v
                     else:
