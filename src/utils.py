@@ -148,6 +148,7 @@ async def eval_trick_from_game_async(declarer, game):
     stdout, stderr = await proc.communicate()
     ev = [e.split() for e in stdout.decode().split('\n')][:-1]
     ev = pd.DataFrame(ev, columns=['leader', 'C', 'D', 'H', 'S', 'N']).set_index('leader').astype(np.int32)
+    print(ev)
     ev.index = ev.index.map({'N': 'W', 'E': 'N', 'S': 'E', 'W': 'S'})
     trick = ev.loc[game['declarer'], game['contract'][-1]]
     if declarer in 'EW':
