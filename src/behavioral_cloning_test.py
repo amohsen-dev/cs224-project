@@ -76,11 +76,15 @@ if __name__=='__main__':
                            'target': training_data_y})
         df_test = pd.DataFrame({'pred': model_pnn(test_pnn_input).detach().numpy().argmax(axis=1),
                                 'target': test_data_y})
-        accuracy = df.query('pred==target').shape[0]/df.shape[0]
-        accuracy_nonpass = df.query('(pred==target) and (pred!=0)').shape[0]/df.query('pred!=0').shape[0]
+        train_accuracy = df.query('pred==target').shape[0]/df.shape[0]
+        test_accuracy = df.query('pred==target').shape[0]/df.shape[0]
+        train_accuracy_nonpass = df_test.query('(pred==target) and (pred!=0)').shape[0]/df_test.query('pred!=0').shape[0]
+        test_accuracy_nonpass = df_test.query('(pred==target) and (pred!=0)').shape[0]/df_test.query('pred!=0').shape[0]
         print(f"Accuracy = {df.query('pred==target').shape[0]/df.shape[0] * 100:.2f} %")
         print(f"Accuracy (nonpass) = {df.query('(pred==target) and (pred!=0)').shape[0]/df.query('pred!=0').shape[0] * 100:.2f} %")
         torch.save(model_pnn.state_dict(), f"../model_cache/model_pnn2/model_pnn_{i_epoch}.data")
         writer.add_scalar("Loss/train", loss, i_epoch)
-        writer.add_scalar("Accuracy/train", accuracy, i_epoch)
-        writer.add_scalar("Accuracy_nonpass/train", accuracy_nonpass, i_epoch)
+        writer.add_scalar("Accuracy/train", train_accuracy, i_epoch)
+        writer.add_scalar("Accuracy/train", test_accuracy, i_epoch)
+        writer.add_scalar("Accuracy_nonpass/train", train_accuracy_nonpass, i_epoch)
+        writer.add_scalar("Accuracy_nonpass/train", test_accuracy_nonpass, i_epoch)
