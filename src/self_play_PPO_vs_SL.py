@@ -25,6 +25,6 @@ if __name__ == '__main__':
             except Exception:
                 pass
         comparison.loc[i] = (np.mean(imps), len(imps), np.std(imps))
-        comparison.to_pickle('SL_vs_RL_comparison.pkl')
+        comparison.to_pickle('SL_vs_PPO_comparison.pkl')
         print(comparison)
 
