@@ -112,6 +112,7 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
             path = None
         return path
     except Exception as exception:
+        raise(exception)
         return None
 
 class PolicyGradient:
@@ -178,6 +179,11 @@ class PolicyGradient:
 
 
 if __name__ == '__main__':
+
+    test = {'players': None, 'dealer': 'W', 'hands': {'S': '6S,5S,10H,6H,KD,6D,5D,3D,2D,AC,JC,10C,6C', 'W': 'AS,10S,3S,KH,QH,JH,5H,4H,3H,JD,9D,KC,3C', 'N': 'KS,QS,7S,AH,8H,2H,QD,8D,9C,8C,7C,5C,2C', 'E': 'JS,9S,8S,4S,2S,9H,7H,AD,10D,7D,4D,QC,4C'}, 'bids': ['1H', '2C', '2H', 'p', '3H', 'd', '3S', 'p', '3N', '4H', 'p', 'p', 'd', 'p', '4S', 'p', 'p', 'd', 'd', 'p', 'p', '5C', 'd', 'd', 'd', 'd', 'd', 'p', 'd', 'd', 'd', 'p', 'p'], 'play': None, 'contract': None, 'declarer': None, 'doubled': None, 'vuln': 'both', 'made': None, 'claimed': None}
+    extract_from_incomplete_game(test)
+
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--ppo', action='store_true')
     args = parser.parse_args()
