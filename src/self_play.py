@@ -188,17 +188,15 @@ class PolicyGradient:
             for path, old_log_probss in zip(paths, old_log_probs):
                 path_len = len(path['rewards'])
                 returns = np.power(self.gamma, np.arange(path_len)[::-1]) * path['rewards'][-1]
-                if Baseline:
-                    preds = []
-                    for ret, state in zip(returns, path['states']):
-                        enn = self.agent_target.model_enn(state)
-                        pred = self.baseline_net(torch.cat([state, enn]))
-                        preds.append(pred.detach())
-                        loss_bl += (pred - ret) ** 2
-                        N_bl += 1
-                    returns = [r - p for r, p in zip(returns, preds)]
-                for state, action, A, old_log_prob in zip(path['states'], path['actions'], returns, old_log_probss):
+                for state, action, ret, old_log_prob in zip(path['states'], path['actions'], returns, old_log_probss):
+
                     enn = self.agent_target.model_enn(state)
+                    if Baseline:
+                        v = self.baseline_net(torch.cat([state, enn]))
+                        loss_bl += (v - ret) ** 2
+                        A = ret - v
+                    else:
+                        A = ret
                     logits = self.agent_target.model_pnn(torch.cat([state, enn]))
                     dist = Categorical(logits=logits)
                     log_prob = dist.log_prob(action)
@@ -214,6 +212,7 @@ class PolicyGradient:
             self.enn_opt.step()
             self.pnn_opt.step()
             if Baseline:
+                loss_bl = loss_bl / N
                 loss_bl.backward()
                 self.baseline_opt.step()
             losses.append(loss.detach().numpy()[0])
@@ -231,7 +230,9 @@ if __name__ == '__main__':
     algorithm = PolicyGradient()
     opponent_pool = [algorithm.agent_opponent]
     imps, losses = [], []
-    ff = 'PPO' if args.ppo else ('AQ' if args.baseline else 'PG')
+    ff = 'PPO' if args.ppo else 'PG'
+    if args.baseline:
+        ff += '_AC'
     writer = SummaryWriter(log_dir=f'../model_cache/RL/{ff}')
     for i in range(1000):
         if i % 4 == 0:
