@@ -153,7 +153,7 @@ class PolicyGradient:
         self.ppo_epsilon = 1e-1
         self.enn_opt = torch.optim.SGD(self.agent_target.model_enn.parameters(), lr=1e-5)
         self.pnn_opt = torch.optim.SGD(self.agent_target.model_pnn.parameters(), lr=1e-4)
-        self.baseline_opt = torch.optim.SGD(self.baseline_net.parameters(), lr=1e-3)
+        self.baseline_opt = torch.optim.SGD(self.baseline_net.parameters(), lr=1e-2)
     def generate_paths(self):
         paths = []
         for _ in tqdm(range(self.num_episodes)):
