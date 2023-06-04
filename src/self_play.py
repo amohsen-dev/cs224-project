@@ -5,6 +5,7 @@ import torch
 import asyncio
 import argparse
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
 from functools import partial
 from abc import abstractmethod
@@ -221,6 +222,6 @@ if __name__ == '__main__':
             imp = algorithm.update_policy(paths, PPO=args.ppo)
             imps.append(imp)
         print('IMP MEAN:')
-        print(np.cumsum(imps) / (1 + np.arange(len(imps))))
+        print(pd.Series(imps).ewm(5).mean())
 
     print('path generated')
