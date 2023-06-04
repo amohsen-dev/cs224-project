@@ -1,3 +1,5 @@
+import pandas as pd
+from tqdm import tqdm
 from self_play import ConsoleAgent, PNNAgent, play_random_game
 
 if __name__ == '__main__':
@@ -10,5 +12,11 @@ if __name__ == '__main__':
         path_pnn='../model_cache/RL/PG/model_pnn_0.data',
     )
 
-    path = play_random_game(agent1, agent2, verbose=True)
-    print('IMP: ', path['rewards'][-1])
+    imps = []
+    for i in tqdm(range(64)):
+        path = play_random_game(agent1, agent2, verbose=True)
+        imp = path['rewards'][-1]
+        imps.append(imp)
+
+    print(pd.Series(imps).to_frame('IMP').expanding().mean())
+
