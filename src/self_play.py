@@ -70,7 +70,7 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
             current_player = game['dealer']
             current_index = PLAYERS.index(current_player)
             if verbose:
-                print(f'PNN as {agent1_side} playing against oppenent')
+                print(f'PNN as {agent1_side} playing against opponent')
             it = 0
             while True:
                 test_contract, _, test_doubled = get_info_from_game_and_bidders(game, bidding_player)
