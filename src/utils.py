@@ -125,19 +125,7 @@ def get_info_from_game_and_bidders(game, bidding_players):
                 break
     return contract, declarer, doubled
 
-"""def eval_trick_from_game(players, game):
-    clin = json_to_lin_cards(game)
-    ev = os.popen(f'../solver/bcalconsole -e e -q -t a -d lin -c {clin}').read()
-    print(ev)
-    ev = [e.split() for e in ev.split('\n')][:-1]
-    ev = pd.DataFrame(ev, columns=['declarer', 'C', 'D', 'H', 'S', 'N']).set_index('leader').astype(np.int32)
-    #ev.index = ev.index.map({'N': 'E', 'E': 'S', 'S': 'W', 'W': 'N'})
-    trick = ev.loc[game['declarer'], game['contract'][-1]]
-    #if players == 'EW':
-    #    trick = 13 - trick
-    return trick"""
-
-async def eval_trick_from_game_async(game, verbose=False):
+async def eval_trick_from_game_async(game, verbose):
     clin = json_to_lin_cards(game)
     cmd = f'../solver/bcalconsole -e e -q -t a -d lin -c {clin}'
     proc = await asyncio.create_subprocess_shell(
