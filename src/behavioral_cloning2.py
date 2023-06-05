@@ -34,7 +34,7 @@ def get_file_data():
     return x_train, y_train, b_train
 
 if __name__=='__main__':
-    lr = 1e-3
+    lr = 1e-2
     batch_size = 32
     num_epochs = 20
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
