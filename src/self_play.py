@@ -249,7 +249,7 @@ if __name__ == '__main__':
         if i % 4 == 0:
             opponent_pool.append(copy.deepcopy(algorithm.agent_target))
             algorithm.agent_opponent = opponent_pool[np.random.choice(len(opponent_pool))]
-        if (i % 4 == 0) and (i % 16 != 0):
+        if (i % 2 == 0):
             torch.save(algorithm.agent_target.model_enn.state_dict(), f"../model_cache3/RL/{ff}/model_enn_{i*algorithm.num_episodes}.data")
             torch.save(algorithm.agent_target.model_pnn.state_dict(), f"../model_cache3/RL/{ff}/model_pnn_{i*algorithm.num_episodes}.data")
         paths = algorithm.generate_paths()
