@@ -139,7 +139,7 @@ async def eval_trick_from_game_async(game, verbose):
         print(stdout.decode())
     ev = [e.split() for e in stdout.decode().split('\n')][:-1]
     ev = pd.DataFrame(ev, columns=['leader', 'C', 'D', 'H', 'S', 'N']).set_index('leader').astype(np.int32)
-    trick = ev.loc[game['declarer'], game['contract'][-1]]
+    trick = 0 if ev.empty else ev.loc[game['declarer'], game['contract'][-1]]
     return trick
 
 def calc_score_adj(pos, declarer, contract, trick, vuln, doubled, verbose=False):

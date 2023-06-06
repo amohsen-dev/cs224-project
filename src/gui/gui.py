@@ -49,12 +49,11 @@ class BridgeGUI(Agent):
         self.bid_button.grid(row=4, column=1, padx=20, ipadx=20)
 
         # Create an Entry Widget
-        self.entry = Entry(self.my_frame, width=42)
+        self.entry = Entry(self.my_frame, width=42, font=('Comic Sans MS', 24, 'bold'))
         self.entry.grid(row=5, column=1, padx=0, ipadx=0)
 
         self.start_button = ttk.Button(self.my_frame, text="Start Game", style='my.TButton', command=self.start_game)
         self.start_button.grid(row=0, column=2, padx=0, ipadx=0)
-
 
         self.bidding_history_frame = LabelFrame(self.my_frame, text='bidding history', font=FONT, bd=0)
         self.bidding_history_frame.grid(row=1, column=2, rowspan=10, padx=20, ipadx=20)
@@ -66,7 +65,7 @@ class BridgeGUI(Agent):
         #for r, c, side in zip([0, 2, 1, 1], [1, 1, 2, 0], ['N', 'S', 'E', 'W']):
         for r, c, side in zip([0, 1, 2, 3], [1, 1, 1, 1], ['N', 'E', 'S', 'W']):
             self.frames[side] = LabelFrame(self.my_frame, text=side, font=FONT, bd=0)
-            self.frames[side].grid(row=r, column=c, padx=2, pady=2, ipadx=2)
+            self.frames[side].grid(row=r, column=c, padx=2, pady=10, ipadx=2)
             for i in range(13):
                 self.labels[side, i] = Label(self.frames[side], text='')
                 self.labels[side, i].grid(row=0, column=i)

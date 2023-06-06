@@ -8,12 +8,12 @@ if __name__ == '__main__':
     for i in tqdm(range(0, 15296, 64)):
         try:
             agent1 = PNNAgent(
-                path_enn=f'../model_cache3/RL/PPO/model_enn_{i}.data',
-                path_pnn=f'../model_cache3/RL/PPO/model_pnn_{i}.data',
+                path_enn=f'../model_cache3/RL/PPO_AC/model_enn_{i}.data',
+                path_pnn=f'../model_cache3/RL/PPO_AC/model_pnn_{i}.data',
             )
             agent2 = PNNAgent(
-                path_enn='../model_cache3/RL/PPO/model_enn_0.data',
-                path_pnn='../model_cache3/RL/PPO/model_pnn_0.data',
+                path_enn='../model_cache3/RL/PPO_AC/model_enn_0.data',
+                path_pnn='../model_cache3/RL/PPO_AC/model_pnn_0.data',
             )
 
             imps = []
@@ -25,7 +25,7 @@ if __name__ == '__main__':
                 except Exception:
                     pass
             comparison.loc[i] = (np.mean(imps), len(imps), np.std(imps))
-            comparison.to_pickle('SL_vs_PPO_comparison_3.pkl')
+            comparison.to_pickle('SL_vs_PPO_AC_comparison_3.pkl')
             print(comparison)
         except Exception:
             pass
