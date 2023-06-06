@@ -5,7 +5,7 @@ from self_play import ConsoleAgent, PNNAgent, play_random_game
 
 if __name__ == '__main__':
     comparison = pd.DataFrame(columns=['dIMP', 'nSample', 'stdIMP'])
-    for i in tqdm(range(0, 15360, 64)):
+    for i in tqdm(range(0, 15296, 64)):
         try:
             agent1 = PNNAgent(
                 path_enn=f'../model_cache3/RL/PG/model_enn_{i}.data',
