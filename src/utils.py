@@ -3,7 +3,7 @@ import asyncio
 import torch
 import numpy as np
 import pandas as pd
-from src.compute_score import calc_score, calc_IMP
+from compute_score import calc_score, calc_IMP
 from itertools import product
 
 NUM_PLAYERS = 4
