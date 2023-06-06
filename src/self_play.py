@@ -245,7 +245,7 @@ if __name__ == '__main__':
     if args.baseline:
         ff += '_AC'
     writer = SummaryWriter(log_dir=f'../model_cache3/RL/{ff}')
-    for i in range(224):
+    for i in range(480):
         if i % 4 == 0:
             opponent_pool.append(copy.deepcopy(algorithm.agent_target))
             algorithm.agent_opponent = opponent_pool[np.random.choice(len(opponent_pool))]
