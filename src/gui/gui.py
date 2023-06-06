@@ -77,7 +77,11 @@ class BridgeGUI(Agent):
         return input
 
     def start_game(self):
-        agent1 = PNNAgent(stochastic=False)
+        agent1 = PNNAgent(
+            path_enn=f'../model_cache/RL/PG/model_enn_20480.data',
+            path_pnn=f'../model_cache/RL/PG/model_pnn_20480.data',
+            stochastic=False
+        )
         path = play_random_game(agent1, self, verbose=True)
         messagebox.showinfo(title='Bidding Results',
                             message=f"Game Completed\nIMP Score for PNN : {path['rewards'][-1]}\nEvaluated with Bridge Calculator. http://bcalc.w8.pl/")
