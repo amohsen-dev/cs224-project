@@ -23,6 +23,9 @@ class Agent:
     def bid(self, game):
         NotImplementedError()
 
+    def transmit_game(self, game, agent1_side):
+        pass
+
 class PNNAgent(Agent):
     def __init__(self,
                  path_enn='../model_cache/model_372_52_e5/model_enn_19.data',
@@ -72,6 +75,7 @@ def play_random_game(agent1: Agent, agent2: Agent, verbose=False):
     target_violation = False
     try:
         for agent1_side, game in zip(['EW', 'NS'], [game1, game2]):
+            agent2.transmit_game(game, agent1_side)
             npasses = 0
             bidding_player = []
             current_player = game['dealer']
