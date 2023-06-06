@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import random
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -78,10 +78,14 @@ class BridgeGUI(Agent):
 
     def start_game(self):
         agent1 = PNNAgent(stochastic=False)
-        play_random_game(agent1, self, verbose=True)
-        pass
+        path = play_random_game(agent1, self, verbose=True)
+        messagebox.showinfo(title='Bidding Results',
+                            message=f"Game Completed\nIMP Score for PNN : {path['rewards'][-1]}\nEvaluated with Bridge Calculator. http://bcalc.w8.pl/")
 
     def transmit_game(self, game, agent1_side):
+        self.PNNside = agent1_side
+        if agent1_side == 'NS':
+            messagebox.showinfo(title='Round Two', message='Switching Boards.\nPNN Now Plays as NS')
         global images
         images = {}
         for side, cards in game['hands'].items():
@@ -95,7 +99,7 @@ class BridgeGUI(Agent):
         decl_idx = PLAYERS.index(game['dealer'])
         n_prev_bids = len(game['bids'])
         current_player = PLAYERS[(decl_idx + n_prev_bids) % len(PLAYERS)]
-        bid_history = ''
+        bid_history = f'PNN Playing as {self.PNNside}'
         for i in range(n_prev_bids):
             bid_history += f"Player {PLAYERS[(decl_idx + i) % len(PLAYERS)]} bid {game['bids'][i]}\n"
         bid_history += f"Awaiting your bid as {current_player} ..."
