@@ -182,6 +182,10 @@ class PolicyGradient:
                 this_old_log_probs.append(dist.log_prob(action).detach())
             old_log_probs.append(this_old_log_probs)
 
+        if PPO:
+            self.num_epochs = 10
+        else:
+            self.num_epochs = 1
         losses, losses_bl = [], []
         for epoch in range(self.num_epochs):
             self.enn_opt.zero_grad()
@@ -240,15 +244,15 @@ if __name__ == '__main__':
     ff = 'PPO' if args.ppo else 'PG'
     if args.baseline:
         ff += '_AC'
-    writer = SummaryWriter(log_dir=f'../model_cache/RL/{ff}')
+    writer = SummaryWriter(log_dir=f'../model_cache3/RL/{ff}')
     for i in range(224):
         if i % 4 == 0:
             opponent_pool.append(copy.deepcopy(algorithm.agent_target))
             algorithm.agent_opponent = opponent_pool[np.random.choice(len(opponent_pool))]
         if (i % 4 == 0) and (i % 16 != 0):
 
-            torch.save(algorithm.agent_target.model_enn.state_dict(), f"../model_cache/RL/{ff}/model_enn_{i*algorithm.num_episodes}.data")
-            torch.save(algorithm.agent_target.model_pnn.state_dict(), f"../model_cache/RL/{ff}/model_pnn_{i*algorithm.num_episodes}.data")
+            torch.save(algorithm.agent_target.model_enn.state_dict(), f"../model_cache3/RL/{ff}/model_enn_{i*algorithm.num_episodes}.data")
+            torch.save(algorithm.agent_target.model_pnn.state_dict(), f"../model_cache3/RL/{ff}/model_pnn_{i*algorithm.num_episodes}.data")
         paths = algorithm.generate_paths()
         if len(paths) > 0:
             imp = algorithm.update_policy(paths, PPO=args.ppo, Baseline=args.baseline)
